@@ -1,0 +1,49 @@
+# Virtual Environments
+.venv/
+**/venv/
+**/.venv/
+env/
+**/env/
+
+# Python Cache & Testing
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.pytest_cache
+**/pytest_cache/
+**/pytest_cache
+
+# Database and Logs
+*.db
+*.sqlite
+backend/nutritrack.db
+**/*.log
+backend.log
+backend/backend.log
+
+# Environment variables
+.env
+backend/.env
+**/.env
+**/*.env
+
+# Flutter / Dart
+**/build/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/web/assets/packages/
+**/android/app/build.gradle.kts.user
+**/*.iml
+.metadata
+.packages
+
+# VS Code & Idea Cache
+.vscode/
+.idea/
+
+# Zip / Artifacts
+*.zip
+backend.zip
