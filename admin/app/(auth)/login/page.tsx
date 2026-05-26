@@ -73,8 +73,9 @@ function LoginForm() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@nutritrack.com"
+              placeholder="Enter your email address"
               required
+              autoComplete="off"
               className="w-full bg-[#1c1c21] border border-[#2c2c35] focus:border-emerald-500/50 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-zinc-600 outline-none transition-colors"
             />
           </div>
@@ -92,8 +93,9 @@ function LoginForm() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••••••"
+              placeholder="Enter your password"
               required
+              autoComplete="new-password"
               className="w-full bg-[#1c1c21] border border-[#2c2c35] focus:border-emerald-500/50 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-zinc-600 outline-none transition-colors"
             />
           </div>
