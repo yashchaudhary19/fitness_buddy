@@ -18,12 +18,14 @@ import {
 interface AICostsClientProps {
   todayCost: number;
   monthCost: number;
+  asOfDate: string;
 }
 
-export default function AICostsClient({ todayCost, monthCost }: AICostsClientProps) {
+export default function AICostsClient({ todayCost, monthCost, asOfDate }: AICostsClientProps) {
   // Generate realistic cost timelines (last 15 days)
+  const baseDate = new Date(asOfDate);
   const timelineData = Array.from({ length: 15 }).map((_, idx) => {
-    const d = new Date();
+    const d = new Date(baseDate.getTime());
     d.setDate(d.getDate() - (14 - idx));
     // deterministic base on date
     const dateStr = d.toISOString().split('T')[0].substring(5);

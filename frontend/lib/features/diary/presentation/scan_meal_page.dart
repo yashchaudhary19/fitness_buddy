@@ -14,6 +14,7 @@ import 'package:frontend/core/network/api_service.dart';
 import 'package:frontend/core/constants/api_constants.dart';
 import 'package:frontend/features/dashboard/providers/summary_provider.dart';
 import 'package:frontend/features/diary/providers/diary_provider.dart';
+import 'package:frontend/core/ads/ad_service.dart';
 
 class ScanMealPage extends ConsumerStatefulWidget {
   const ScanMealPage({super.key});
@@ -187,17 +188,21 @@ class _ScanMealPageState extends ConsumerState<ScanMealPage> {
         _isLogging = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.primary,
-          content: Text(
-            "Logged AI analyzed items to $_mealType!",
-            style: GoogleFonts.outfit(color: Colors.black, fontWeight: FontWeight.bold),
-          ),
-        ),
-      );
-
-      context.pop(); // Return to search/diary
+      // Show interstitial ad, then pop the screen and show success SnackBar
+      AdService.showInterstitial(() {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: AppColors.primary,
+              content: Text(
+                "Logged AI analyzed items to $_mealType!",
+                style: GoogleFonts.outfit(color: Colors.black, fontWeight: FontWeight.bold),
+              ),
+            ),
+          );
+          context.pop(); // Return to search/diary
+        }
+      });
     } catch (e) {
       setState(() {
         _isLogging = false;

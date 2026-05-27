@@ -2,17 +2,58 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:frontend/core/ads/ad_service.dart';
 import 'package:frontend/core/theme/app_theme.dart';
 import 'package:frontend/features/dashboard/providers/summary_provider.dart';
 
-class DashboardSummaryPage extends ConsumerWidget {
+class DashboardSummaryPage extends ConsumerStatefulWidget {
   const DashboardSummaryPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardSummaryPage> createState() => _DashboardSummaryPageState();
+}
+
+class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
+  BannerAd? _bannerAd;
+  bool _isBannerAdLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBannerAd();
+  }
+
+  void _loadBannerAd() {
+    if (!AdService.isSupported) return;
+    final banner = BannerAd(
+      adUnitId: AdService.bannerAdUnitId,
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          if (mounted) setState(() { _isBannerAdLoaded = true; });
+        },
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+        },
+      ),
+    );
+    banner.load();
+    _bannerAd = banner;
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(summaryProvider);
     final notifier = ref.read(summaryProvider.notifier);
 
@@ -66,16 +107,20 @@ class DashboardSummaryPage extends ConsumerWidget {
                               children: [
                                 // Glowing circular calories ring
                                 _buildCalorieRingCard(state.summary!),
-                                const SizedBox(height: 24),
-                                
+                                const SizedBox(height: 20),
+
+                                // ── Banner Ad (like MyFitnessPal) ──
+                                _buildDashboardBannerAd(),
+                                const SizedBox(height: 20),
+
                                 // Macros details bars
                                 _buildMacrosCard(state.summary!),
                                 const SizedBox(height: 24),
-                                
+
                                 // Hydration tracking card
                                 _buildWaterCard(context, state.summary!, notifier),
                                 const SizedBox(height: 24),
-                                
+
                                 // Workouts/Exercise tracking card
                                 _buildExerciseCard(state.summary!),
                               ],
@@ -454,6 +499,66 @@ class DashboardSummaryPage extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  /// Banner ad block — white card with "Say goodbye to ads" caption below.
+  Widget _buildDashboardBannerAd() {
+    if (!AdService.isSupported || !_isBannerAdLoaded || _bannerAd == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      children: [
+        // White rounded card containing the banner (matches screenshot)
+        Container(
+          width: double.infinity,
+          height: _bannerAd!.size.height.toDouble(),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.18),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: AdWidget(ad: _bannerAd!),
+          ),
+        ),
+        const SizedBox(height: 10),
+
+        // "Say goodbye to ads · Go Premium" row
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Say goodbye to ads.  ",
+              style: GoogleFonts.outfit(
+                color: AppColors.darkTextSecondary,
+                fontSize: 13,
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                // TODO: navigate to Premium page when implemented
+              },
+              child: Text(
+                "Go Premium",
+                style: GoogleFonts.outfit(
+                  color: AppColors.primary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

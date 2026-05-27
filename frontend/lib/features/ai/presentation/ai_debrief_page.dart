@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:frontend/core/ads/ad_service.dart';
 import 'package:frontend/core/theme/app_theme.dart';
 import 'package:frontend/features/ai/providers/ai_coach_provider.dart';
 
@@ -16,6 +17,7 @@ class AiDebriefPage extends ConsumerStatefulWidget {
 class _AiDebriefPageState extends ConsumerState<AiDebriefPage> {
   DateTime _selectedDate = DateTime.now();
   final Map<String, bool> _committedTweaks = {};
+  bool _adShownForDate = false;
 
   String get _dateStr => DateFormat('yyyy-MM-dd').format(_selectedDate);
 
@@ -23,6 +25,7 @@ class _AiDebriefPageState extends ConsumerState<AiDebriefPage> {
     setState(() {
       _selectedDate = _selectedDate.add(Duration(days: days));
       _committedTweaks.clear(); // Reset checkbox commitments for new date
+      _adShownForDate = false;  // Allow ad to show again for the new date
     });
   }
 
@@ -49,7 +52,16 @@ class _AiDebriefPageState extends ConsumerState<AiDebriefPage> {
             // Content Body
             Expanded(
               child: debriefFuture.when(
-                data: (debrief) => _buildDebriefContent(debrief),
+                data: (debrief) {
+                  // Show rewarded video ad once per day when debrief loads
+                  if (!_adShownForDate) {
+                    _adShownForDate = true;
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      AdService.showRewardedOncePerDay('debrief');
+                    });
+                  }
+                  return _buildDebriefContent(debrief);
+                },
                 loading: () => const Center(
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),

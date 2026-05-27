@@ -31,7 +31,7 @@ class AIService:
         self.model = settings.GEMINI_MODEL
 
     def _clean_json(self, raw_text: str) -> str:
-        """Strip markdown codeblock wrappers from AI model JSON output."""
+        """Strip markdown codeblock wrappers and clean JSON string from AI model output."""
         cleaned = raw_text.strip()
         if cleaned.startswith("```json"):
             cleaned = cleaned[7:]
@@ -39,7 +39,18 @@ class AIService:
             cleaned = cleaned[3:]
         if cleaned.endswith("```"):
             cleaned = cleaned[:-3]
-        return cleaned.strip()
+        cleaned = cleaned.strip()
+
+        # Find first '{' and last '}'
+        start_idx = cleaned.find("{")
+        end_idx = cleaned.rfind("}")
+        if start_idx != -1 and end_idx != -1:
+            cleaned = cleaned[start_idx:end_idx + 1]
+
+        # Clean trailing commas before closing braces/brackets
+        import re
+        cleaned = re.sub(r',\s*([\]}])', r'\1', cleaned)
+        return cleaned
 
     async def _call_gemini(
         self,
@@ -407,11 +418,18 @@ class AIService:
         try:
             raw_res = await self._call_gemini(
                 messages,
-                response_format=None,
+                response_format={"type": "json_object"},
                 model=self.model
             )
             cleaned = self._clean_json(raw_res)
-            return json.loads(cleaned)
+            try:
+                return json.loads(cleaned)
+            except json.JSONDecodeError as jde:
+                logger.error(f"Meal scan JSON decode failed. Error: {jde}. Cleaned content: {cleaned}. Raw content: {raw_res}")
+                raise HTTPException(
+                    status_code=502,
+                    detail=f"AI returned invalid JSON: {str(jde)}"
+                )
         except HTTPException as e:
             logger.error(f"Meal scan AI HTTP error: {e.detail}")
             raise

@@ -7,6 +7,7 @@ export const revalidate = 0;
 export default async function AICostsPage() {
   const todayCost = await getAICostToday();
   const monthCost = await getAICostMonth();
+  const asOfDate = new Date().toISOString();
 
   return (
     <div className="space-y-6">
@@ -17,7 +18,7 @@ export default async function AICostsPage() {
         </p>
       </div>
 
-      <AICostsClient todayCost={todayCost} monthCost={monthCost} />
+      <AICostsClient todayCost={todayCost} monthCost={monthCost} asOfDate={asOfDate} />
     </div>
   );
 }

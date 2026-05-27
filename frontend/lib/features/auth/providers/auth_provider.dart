@@ -61,6 +61,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final userResponse = await _apiService.get(ApiConstants.me);
       if (userResponse.success && userResponse.data != null) {
         currentUser = User.fromJson(userResponse.data as Map<String, dynamic>);
+        final onboardingCompleted = !TokenStorage.needsOnboarding;
         
         // Check if the user already has a goal set up on the backend
         try {
@@ -70,14 +71,24 @@ class AuthNotifier extends StateNotifier<AuthState> {
             _ref.read(authStateProvider.notifier).state = AuthState.authenticated;
             state = AuthState.authenticated;
           } else {
-            _ref.read(authStateProvider.notifier).state = AuthState.needsOnboarding;
-            state = AuthState.needsOnboarding;
+            if (onboardingCompleted) {
+              _ref.read(authStateProvider.notifier).state = AuthState.authenticated;
+              state = AuthState.authenticated;
+            } else {
+              _ref.read(authStateProvider.notifier).state = AuthState.needsOnboarding;
+              state = AuthState.needsOnboarding;
+            }
           }
         } on ApiException catch (e) {
           // If goal endpoint returns 404, we need onboarding
           if (e.statusCode == 404) {
-            _ref.read(authStateProvider.notifier).state = AuthState.needsOnboarding;
-            state = AuthState.needsOnboarding;
+            if (onboardingCompleted) {
+              _ref.read(authStateProvider.notifier).state = AuthState.authenticated;
+              state = AuthState.authenticated;
+            } else {
+              _ref.read(authStateProvider.notifier).state = AuthState.needsOnboarding;
+              state = AuthState.needsOnboarding;
+            }
           } else {
             // General failure, fall back to authenticated if token is valid
             _ref.read(authStateProvider.notifier).state = AuthState.authenticated;

@@ -29,6 +29,13 @@ export default function UsersClient({
   const [plan, setPlan] = useState(initialPlan);
   const [status, setStatus] = useState(initialStatus);
   const [loading, setLoading] = useState(false);
+  const dateFormatter = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+  const formatDate = (value: string) => dateFormatter.format(new Date(value));
 
   // Update URL search parameters
   const updateFilters = (newSearch: string, newPlan: string, newStatus: string, newPage: number) => {
@@ -157,11 +164,7 @@ export default function UsersClient({
       header: 'Joined Date',
       accessor: (user: UserRow) => (
         <span className="text-zinc-400 text-xs font-medium">
-          {new Date(user.created_at).toLocaleDateString(undefined, {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-          })}
+          {formatDate(user.created_at)}
         </span>
       ),
     },
@@ -169,11 +172,7 @@ export default function UsersClient({
       header: 'Last Active',
       accessor: (user: UserRow) => (
         <span className="text-zinc-400 text-xs font-medium">
-          {new Date(user.last_active).toLocaleDateString(undefined, {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-          })}
+          {formatDate(user.last_active)}
         </span>
       ),
     },

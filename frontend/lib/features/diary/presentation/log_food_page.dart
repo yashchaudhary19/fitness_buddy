@@ -14,6 +14,8 @@ import 'package:frontend/core/constants/api_constants.dart';
 import 'package:frontend/features/dashboard/providers/summary_provider.dart';
 import 'package:frontend/features/diary/providers/search_provider.dart';
 import 'package:frontend/features/diary/providers/diary_provider.dart';
+import 'package:frontend/core/ads/ad_service.dart';
+import 'package:frontend/core/ads/obsidian_native_ad_widget.dart';
 
 class LogFoodPage extends ConsumerStatefulWidget {
   const LogFoodPage({super.key});
@@ -72,15 +74,19 @@ class _LogFoodPageState extends ConsumerState<LogFoodPage> {
           onSuccess: () {
             context.pop(); // Close bottom sheet
             context.pop(); // Return to diary page
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                backgroundColor: AppColors.primary,
-                content: Text(
-                  "Logged ${food.name} successfully!",
-                  style: GoogleFonts.outfit(color: Colors.black, fontWeight: FontWeight.bold),
+            
+            // Show Interstitial Ad upon successfully saving the meal log
+            AdService.showInterstitial(() {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  backgroundColor: AppColors.primary,
+                  content: Text(
+                    "Logged ${food.name} successfully!",
+                    style: GoogleFonts.outfit(color: Colors.black, fontWeight: FontWeight.bold),
+                  ),
                 ),
-              ),
-            );
+              );
+            });
           },
         );
       },
@@ -90,7 +96,6 @@ class _LogFoodPageState extends ConsumerState<LogFoodPage> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(searchProvider);
-    final notifier = ref.read(searchProvider.notifier);
 
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
@@ -148,10 +153,26 @@ class _LogFoodPageState extends ConsumerState<LogFoodPage> {
                                   color: Colors.transparent,
                                   child: ListView.separated(
                                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                                    itemCount: state.results.length,
-                                    separatorBuilder: (context, index) => const Divider(color: AppColors.darkBorder, height: 1),
+                                    itemCount: state.results.length + (state.results.length ~/ 4),
+                                    separatorBuilder: (context, index) {
+                                      final isCurrentAd = (index + 1) % 5 == 0;
+                                      final isNextAd = (index + 2) % 5 == 0;
+                                      if (isCurrentAd || isNextAd) {
+                                        return const SizedBox.shrink();
+                                      }
+                                      return const Divider(color: AppColors.darkBorder, height: 1);
+                                    },
                                     itemBuilder: (context, index) {
-                                      final food = state.results[index];
+                                      final isAd = (index + 1) % 5 == 0;
+                                      if (isAd) {
+                                        return const ObsidianNativeAdWidget();
+                                      }
+
+                                      final originalIndex = index - (index ~/ 5);
+                                      if (originalIndex >= state.results.length) {
+                                        return const SizedBox.shrink();
+                                      }
+                                      final food = state.results[originalIndex];
                                       return ListTile(
                                         contentPadding: const EdgeInsets.symmetric(vertical: 8),
                                         title: Text(
@@ -805,15 +826,27 @@ class _VoiceLoggingSheetState extends ConsumerState<_VoiceLoggingSheet> with Sin
           }
         }
 
-        setState(() {
-          _isProcessing = false;
-          _transcription = loggedSummaries.isNotEmpty
-              ? "Success! Logged: ${loggedSummaries.join(', ')}"
-              : "Could not log parsed voice items.";
-        });
+        if (loggedSummaries.isNotEmpty) {
+          setState(() {
+            _isProcessing = false;
+            _transcription = "Success! Logged: ${loggedSummaries.join(', ')}";
+          });
 
-        ref.read(summaryProvider.notifier).fetchSummary();
-        ref.read(diaryProvider.notifier).fetchDiaryDetails(ref.read(summaryProvider).selectedDate);
+          ref.read(summaryProvider.notifier).fetchSummary();
+          ref.read(diaryProvider.notifier).fetchDiaryDetails(ref.read(summaryProvider).selectedDate);
+
+          // Show interstitial ad after successful voice log
+          if (mounted) {
+            AdService.showInterstitial(() {
+              // Ad dismissed — sheet stays open showing success message
+            });
+          }
+        } else {
+          setState(() {
+            _isProcessing = false;
+            _transcription = "Could not log parsed voice items.";
+          });
+        }
       } else {
         setState(() {
           _isProcessing = false;

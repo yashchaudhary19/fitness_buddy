@@ -1,6 +1,4 @@
-import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/network/dio_client.dart';
 
@@ -35,7 +33,7 @@ class ApiException implements Exception {
   ApiException(this.message, {this.statusCode, this.errorCode});
 
   @override
-  String toString() => "ApiException: $message (status: $statusCode, error: $errorCode)";
+  String toString() => message;
 }
 
 class ApiService {
@@ -58,11 +56,24 @@ class ApiService {
         }
       } catch (_) {}
       return ApiException(
-        "Request failed with status code ${response.statusCode}",
+        "Server returned an error (code ${response.statusCode})",
         statusCode: response.statusCode,
       );
     }
-    return ApiException(e.message ?? "Network connection error occurred");
+    
+    switch (e.type) {
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+        return ApiException("Connection timed out. Please check your internet connection.");
+      case DioExceptionType.connectionError:
+        return ApiException("Cannot reach the server. Please check your network or verify the backend is running.");
+      default:
+        if (e.message != null && e.message!.contains("SocketException")) {
+          return ApiException("Network connection error. Please check your internet connection.");
+        }
+        return ApiException("A network error occurred. Please try again.");
+    }
   }
 
   Future<ResponseEnvelope> get(String path, {Map<String, dynamic>? queryParameters}) async {

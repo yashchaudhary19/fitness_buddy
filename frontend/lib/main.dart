@@ -6,10 +6,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:frontend/core/theme/app_theme.dart';
 import 'package:frontend/core/router/router.dart';
 import 'package:frontend/core/network/token_storage.dart';
+import 'package:frontend/core/ads/ad_service.dart';
 
 void main() async {
   // Ensure Flutter engine bindings are fully initialized
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize AdMob SDK
+  await AdService.initialize();
 
   // Initialize Hive database
   await Hive.initFlutter();

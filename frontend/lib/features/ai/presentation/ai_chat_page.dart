@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:frontend/core/theme/app_theme.dart';
 import 'package:frontend/features/ai/providers/ai_coach_provider.dart';
+import 'package:frontend/core/ads/ad_service.dart';
 
 class AiChatPage extends ConsumerStatefulWidget {
   const AiChatPage({super.key});
@@ -42,13 +43,79 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
     });
   }
 
+  void _promptAndSend(String text) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: AppColors.darkSurface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: AppColors.darkBorder),
+          ),
+          title: Row(
+            children: [
+              const Icon(LucideIcons.sparkles, color: AppColors.primary, size: 22),
+              const SizedBox(width: 10),
+              Text(
+                "Unlock AI Response",
+                style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+            ],
+          ),
+          content: Text(
+            "Watch a quick sponsor video to get a detailed response from your AI Health Coach.",
+            style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 14),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                "Cancel",
+                style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontWeight: FontWeight.w600),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context); // close dialog
+                
+                // Show Rewarded Ad to user
+                AdService.showRewarded(
+                  // User watched the ad fully
+                  () {
+                    ref.read(aiChatProvider.notifier).sendMessage(text);
+                    _messageController.clear();
+                    _scrollToBottom();
+                  },
+                  onFailedToLoad: () {
+                    // Fallback: Show warning and do not send
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        backgroundColor: AppColors.error,
+                        content: Text(
+                          "Failed to load ad. Please try again.",
+                          style: GoogleFonts.outfit(color: Colors.white),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+              child: Text(
+                "Watch Ad & Send",
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.black),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _sendMessage() {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
-
-    ref.read(aiChatProvider.notifier).sendMessage(text);
-    _messageController.clear();
-    _scrollToBottom();
+    _promptAndSend(text);
   }
 
   @override
@@ -169,8 +236,7 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
                         side: BorderSide(color: AppColors.darkBorder.withOpacity(0.4)),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         onPressed: () {
-                          ref.read(aiChatProvider.notifier).sendMessage(suggestion);
-                          _scrollToBottom();
+                          _promptAndSend(suggestion);
                         },
                       ),
                     );

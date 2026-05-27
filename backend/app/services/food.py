@@ -24,7 +24,7 @@ class FoodService:
 
     def _parse_product(self, product_data: Dict[str, Any], source: FoodSource) -> Dict[str, Any]:
         """Parse raw nutritional data from Open Food Facts into database columns."""
-        nutriments = product_data.get("nutriments", {})
+        nutriments = product_data.get("nutriments") or {}
         
         # Determine calorie value per 100g (energy-kcal preferred, fallback to energy)
         calories = nutriments.get("energy-kcal_100g")
@@ -288,13 +288,35 @@ class FoodService:
 
     async def lookup_barcode(self, barcode: str) -> Optional[FoodItem]:
         """
-        Lookup barcode using Open Food Facts API directly.
-        If not found, falls back to searching the web (DuckDuckGo) to resolve
-        the product name, and then estimates macros using Gemini AI / Local DB / Defaults.
+        Lookup barcode. Checks local DB first, then queries Open Food Facts API.
+        If macros are zero, estimates them using Gemini or local DB similarities.
         """
         barcode = barcode.strip()
         if not barcode:
             return None
+
+        # 0. Check local DB first
+        existing = await self.food_repo.get_by_barcode(barcode)
+        if existing:
+            # If it exists, check if all macros are 0.0. If so, let's try to estimate them!
+            if (existing.calories_per_100g == 0.0 and 
+                existing.carbs_per_100g == 0.0 and 
+                existing.protein_per_100g == 0.0 and 
+                existing.fat_per_100g == 0.0):
+                logger.info(f"Product '{existing.name}' found in local DB but has 0 macros. Estimating macros...")
+                macros = None
+                if self.api_key:
+                    macros = await self._estimate_macros_via_gemini(existing.name, existing.brand)
+                if not macros:
+                    macros = await self._estimate_macros_from_local_db(existing.name)
+                if macros:
+                    existing.calories_per_100g = max(0.0, float(macros.get("calories_per_100g", 0.0)))
+                    existing.carbs_per_100g = max(0.0, float(macros.get("carbs_per_100g", 0.0)))
+                    existing.protein_per_100g = max(0.0, float(macros.get("protein_per_100g", 0.0)))
+                    existing.fat_per_100g = max(0.0, float(macros.get("fat_per_100g", 0.0)))
+                    existing.fiber_per_100g = max(0.0, float(macros.get("fiber_per_100g", 0.0)))
+                    await self.db.commit()
+            return existing
 
         # 1. Query Open Food Facts API
         logger.info(f"Querying Open Food Facts API for barcode '{barcode}'...")
@@ -309,10 +331,29 @@ class FoodService:
                         product_data = data.get("product", {})
                         parsed_data = self._parse_product(product_data, FoodSource.BARCODE)
                         
-                        existing = await self.food_repo.get_by_barcode(barcode)
-                        if existing:
-                            return existing
+                        # Check if all macros are 0 and we should try to estimate them
+                        if (parsed_data["calories_per_100g"] == 0.0 and 
+                            parsed_data["carbs_per_100g"] == 0.0 and 
+                            parsed_data["protein_per_100g"] == 0.0 and 
+                            parsed_data["fat_per_100g"] == 0.0):
                             
+                            product_name = parsed_data["name"]
+                            brand_name = parsed_data["brand"]
+                            logger.info(f"Open Food Facts returned 0 macros for '{product_name}'. Attempting to estimate macros...")
+                            
+                            macros = None
+                            if self.api_key:
+                                macros = await self._estimate_macros_via_gemini(product_name, brand_name)
+                            if not macros:
+                                macros = await self._estimate_macros_from_local_db(product_name)
+                            
+                            if macros:
+                                parsed_data["calories_per_100g"] = max(0.0, float(macros.get("calories_per_100g", 0.0)))
+                                parsed_data["carbs_per_100g"] = max(0.0, float(macros.get("carbs_per_100g", 0.0)))
+                                parsed_data["protein_per_100g"] = max(0.0, float(macros.get("protein_per_100g", 0.0)))
+                                parsed_data["fat_per_100g"] = max(0.0, float(macros.get("fat_per_100g", 0.0)))
+                                parsed_data["fiber_per_100g"] = max(0.0, float(macros.get("fiber_per_100g", 0.0)))
+                                
                         db_item = FoodItem(**parsed_data)
                         await self.food_repo.create(db_item)
                         await self.db.commit()

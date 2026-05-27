@@ -16,6 +16,15 @@ export default function ReportsClient({ initialReports }: ReportsClientProps) {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const dateTimeFormatter = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'UTC',
+  });
+  const formatDateTime = (value: string) => dateTimeFormatter.format(new Date(value));
 
   const handleResolve = async (id: string) => {
     setLoading(true);
@@ -88,7 +97,7 @@ export default function ReportsClient({ initialReports }: ReportsClientProps) {
             <Mail size={12} /> {report.email}
           </span>
           <span className="text-zinc-500 text-xs flex items-center gap-1">
-            <Clock size={12} /> {new Date(report.created_at).toLocaleString()}
+            <Clock size={12} /> {formatDateTime(report.created_at)}
           </span>
         </div>
       ),

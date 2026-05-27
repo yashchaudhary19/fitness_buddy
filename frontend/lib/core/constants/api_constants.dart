@@ -7,8 +7,8 @@ class ApiConstants {
       return "http://localhost:8000";
     }
     if (Platform.isAndroid) {
-      // With adb reverse tcp:8000 tcp:8000, we can use localhost
-      return "http://localhost:8000";
+      // Use 127.0.0.1 with 'adb reverse tcp:8000 tcp:8000' to tunnel connection via ADB
+      return "http://127.0.0.1:8000";
     }
     return "http://127.0.0.1:8000";
   }

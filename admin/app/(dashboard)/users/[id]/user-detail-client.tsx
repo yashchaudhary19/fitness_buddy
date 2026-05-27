@@ -38,6 +38,22 @@ export default function UserDetailClient({ user }: UserDetailClientProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'overview' | 'food-logs'>('overview');
   const [loading, setLoading] = useState(false);
+  const dateFormatter = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+  const dateTimeFormatter = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'UTC',
+  });
+  const formatDate = (value: string) => dateFormatter.format(new Date(value));
+  const formatDateTime = (value: string) => dateTimeFormatter.format(new Date(value));
 
   const handleBanToggle = async () => {
     if (!confirm(`Are you sure you want to ${user.is_active ? 'ban' : 'unban'} this user?`)) return;
@@ -159,7 +175,7 @@ export default function UserDetailClient({ user }: UserDetailClientProps) {
             <p className="text-zinc-400 text-sm">{user.email}</p>
             <p className="text-zinc-500 text-xs flex items-center gap-1.5 mt-1">
               <Calendar size={13} />
-              Joined on {new Date(user.created_at).toLocaleDateString()}
+              Joined on {formatDate(user.created_at)}
             </p>
           </div>
         </div>
@@ -345,7 +361,7 @@ export default function UserDetailClient({ user }: UserDetailClientProps) {
                         <td className="px-6 py-4 text-sm font-bold font-mono text-emerald-400">{log.calories} kcal</td>
                         <td className="px-6 py-4 text-xs font-medium text-zinc-500 flex items-center gap-1.5 mt-0.5">
                           <Clock size={13} />
-                          {new Date(log.logged_at).toLocaleString()}
+                          {formatDateTime(log.logged_at)}
                         </td>
                       </tr>
                     );

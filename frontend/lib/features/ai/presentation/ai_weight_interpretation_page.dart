@@ -2,14 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:frontend/core/ads/ad_service.dart';
 import 'package:frontend/core/theme/app_theme.dart';
 import 'package:frontend/features/ai/providers/ai_coach_provider.dart';
 
-class AiWeightInterpretationPage extends ConsumerWidget {
+class AiWeightInterpretationPage extends ConsumerStatefulWidget {
   const AiWeightInterpretationPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AiWeightInterpretationPage> createState() => _AiWeightInterpretationPageState();
+}
+
+class _AiWeightInterpretationPageState extends ConsumerState<AiWeightInterpretationPage> {
+  bool _adShown = false;
+
+  @override
+  Widget build(BuildContext context) {
     final interpretationFuture = ref.watch(aiWeightInterpretationProvider);
 
     return Scaffold(
@@ -33,7 +41,15 @@ class AiWeightInterpretationPage extends ConsumerWidget {
       ),
       body: SafeArea(
         child: interpretationFuture.when(
-          data: (data) => _buildContent(context, ref, data),
+          data: (data) {
+            if (!_adShown) {
+              _adShown = true;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                AdService.showRewardedOncePerDay('weight_trend');
+              });
+            }
+            return _buildContent(context, ref, data);
+          },
           loading: () => const Center(
             child: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),

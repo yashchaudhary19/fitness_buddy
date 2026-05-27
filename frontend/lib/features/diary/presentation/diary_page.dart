@@ -8,6 +8,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:frontend/core/theme/app_theme.dart';
 import 'package:frontend/features/dashboard/providers/summary_provider.dart';
 import 'package:frontend/features/diary/providers/diary_provider.dart';
+import 'package:frontend/core/ads/ad_banner_widget.dart';
+import 'package:frontend/core/ads/diary_native_ad_widget.dart';
 
 class DiaryPage extends ConsumerWidget {
   const DiaryPage({super.key});
@@ -56,7 +58,11 @@ class DiaryPage extends ConsumerWidget {
                                 // Dinner Card
                                 _buildMealSectionCard(context, "Dinner", "dinner", state.meals['dinner']!, notifier),
                                 const SizedBox(height: 18),
-                                
+
+                                // ── Native Ad between Dinner & Snacks ──
+                                const DiaryNativeAdWidget(),
+                                const SizedBox(height: 18),
+
                                 // Snacks Card
                                 _buildMealSectionCard(context, "Snacks", "snacks", state.meals['snacks']!, notifier),
                                 const SizedBox(height: 24),
@@ -67,6 +73,12 @@ class DiaryPage extends ConsumerWidget {
                             ),
                           ),
                         ),
+            ),
+            
+            // AdMob Banner / Premium Fallback Promo at the bottom, cleared of floating nav bar
+            const Padding(
+              padding: EdgeInsets.only(left: 20, right: 20, top: 4, bottom: 108),
+              child: AdBannerWidget(),
             ),
           ],
         ),

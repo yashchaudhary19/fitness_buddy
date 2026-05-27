@@ -140,7 +140,7 @@ final aiDebriefProvider = FutureProvider.family<DailyDebrief, String>((ref, date
   if (response.success && response.data != null) {
     return DailyDebrief.fromJson(response.data as Map<String, dynamic>);
   } else {
-    throw Exception(response.error ?? "Failed to fetch nutrition debrief.");
+    throw ApiException(response.error ?? "Failed to fetch nutrition debrief.");
   }
 });
 
@@ -169,6 +169,6 @@ final aiWeightInterpretationProvider = FutureProvider<WeightInterpretation>((ref
   if (response.success && response.data != null) {
     return WeightInterpretation.fromJson(response.data as Map<String, dynamic>);
   } else {
-    throw Exception(response.error ?? "Failed to fetch weight trend analysis.");
+    throw ApiException(response.error ?? "Failed to fetch weight trend analysis.");
   }
 });
