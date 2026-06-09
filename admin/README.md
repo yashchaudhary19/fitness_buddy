@@ -41,7 +41,7 @@ admin/
 │   │   ├── reports/             # REST actions to resolve/dismiss tickets
 │   │   └── users/               # REST actions to ban/delete user records
 │   ├── layout.tsx               # Root layout wrapper with Tailwind fonts
-│   └── globals.css              # Custom base styles and scrollbars config
+│   └── globals.css              # Custom base styles and scrollbars config 
 ├── components/
 │   ├── data-table.tsx           # Reusable paginated custom tables
 │   ├── stat-card.tsx            # Premium metrics cards with hover scaling
