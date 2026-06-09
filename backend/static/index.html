@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NutriVault — AI Calorie Tracker & Nutrition App for Android</title>
+  <meta name="description" content="Track calories, log meals with AI photo scan, scan barcodes & build healthy habits. NutriVault is the smartest free nutrition tracking app on Android. Download free today!" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://nutrivault.techotd.in/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://nutrivault.techotd.in/" />
+  <meta property="og:title" content="NutriVault — AI Calorie Tracker & Nutrition App for Android" />
+  <meta property="og:description" content="Track calories, log meals with AI photo scan, scan barcodes & build healthy habits. NutriVault is the smartest free nutrition tracking app on Android." />
+  <meta property="og:image" content="https://nutrivault.techotd.in/assets/logo.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="NutriVault — AI Calorie Tracker & Nutrition App" />
+  <meta name="twitter:description" content="Track calories, log meals with AI photo scan, scan barcodes & build healthy habits." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "MobileApplication",
+    "name": "NutriVault",
+    "description": "AI-powered calorie and nutrition tracking app for Android with barcode scanning, AI photo scan, and voice meal logging.",
+    "applicationCategory": "HealthApplication",
+    "operatingSystem": "Android",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.8", "ratingCount": "1240" },
+    "url": "https://nutrivault.techotd.in"
+  }
+  </script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo" id="nav-logo-link" aria-label="NutriVault Home">
+      <img src="assets/logo.png" alt="NutriVault Logo" class="nav-logo-img" />
+      <span class="nav-logo-text">NutriVault</span>
+    </a>
+    <div class="nav-links" id="nav-links">
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#how-it-works" class="nav-link">How It Works</a>
+      <a href="#faq" class="nav-link">FAQ</a>
+    </div>
+    <a href="#download" class="btn-primary nav-cta" id="nav-cta">Get the App</a>
+    <button class="nav-hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+      <span class="material-symbols-outlined">menu</span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+  <a href="#features" class="mobile-link">Features</a>
+  <a href="#how-it-works" class="mobile-link">How It Works</a>
+  <a href="#faq" class="mobile-link">FAQ</a>
+  <a href="#download" class="btn-primary mobile-cta">Get the App Free</a>
+</div>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="hero">
+  <div class="hero-bg-glow"></div>
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        <span>Free on Android</span>
+      </div>
+      <h1 class="hero-title">
+        Eat Smart.<br />
+        Track Effortlessly.<br />
+        <span class="text-gradient">Transform.</span>
+      </h1>
+      <p class="hero-subtitle">
+        AI-powered nutrition tracking with barcode scanning, voice logging, and personalized coaching. The smartest way to hit your health goals.
+      </p>
+      <div class="hero-actions">
+        <a href="#download" class="btn-primary btn-lg" id="hero-play-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 20.5v-17c0-.83 1-.95 1.5-.5l13 8.5-13 8.5c-.5.45-1.5.33-1.5-.5z"/></svg>
+          Get it on Google Play
+        </a>
+        <a href="#how-it-works" class="btn-secondary btn-lg" id="hero-see-btn">
+          <span class="material-symbols-outlined" style="font-size:20px;">visibility</span>
+          See How It Works
+        </a>
+      </div>
+      <div class="hero-trust">
+        <div class="trust-item">
+          <span class="material-symbols-outlined" style="color:#C8F135;font-size:18px;font-variation-settings:'FILL' 1;">star</span>
+          <span>4.8 Rating</span>
+        </div>
+        <div class="trust-dot"></div>
+        <div class="trust-item">
+          <span class="material-symbols-outlined" style="color:#C8F135;font-size:18px;">group</span>
+          <span>50K+ Users</span>
+        </div>
+        <div class="trust-dot"></div>
+        <div class="trust-item">
+          <span class="material-symbols-outlined" style="color:#C8F135;font-size:18px;">lock</span>
+          <span>100% Private</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phone mockup with REAL screenshots -->
+    <div class="hero-mockup">
+      <div class="mockup-glow"></div>
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <img src="assets/screenshots/s1_welcome.jpg"      alt="NutriVault welcome onboarding screen" class="screen-img active" id="screen-0" loading="eager" />
+          <img src="assets/screenshots/s2_goal_select.jpg"  alt="NutriVault goal selection — Lose, Maintain or Gain Weight" class="screen-img" id="screen-1" loading="lazy" />
+          <img src="assets/screenshots/s3_goal_profile.jpg" alt="NutriVault My Goal Profile with calorie budget and macros" class="screen-img" id="screen-2" loading="lazy" />
+          <img src="assets/screenshots/s4_summary.jpg"      alt="NutriVault Summary dashboard with calorie ring" class="screen-img" id="screen-3" loading="lazy" />
+          <img src="assets/screenshots/s5_log.jpg"          alt="NutriVault Log Breakfast with Barcode, AI Photo and AI Voice" class="screen-img" id="screen-4" loading="lazy" />
+          <img src="assets/screenshots/s6_aiscan.jpg"       alt="NutriVault AI Scan showing chapati and curry with 386 kcal" class="screen-img" id="screen-5" loading="lazy" />
+          <img src="assets/screenshots/s7_diary.jpg"        alt="NutriVault Nutrition Diary breakfast log" class="screen-img" id="screen-6" loading="lazy" />
+          <img src="assets/screenshots/s8_aicoach.jpg"      alt="NutriVault AI Coaching — Fitness Buddy" class="screen-img" id="screen-7" loading="lazy" />
+          <img src="assets/screenshots/s9_progress.jpg"     alt="NutriVault Progress and Analytics weight graph" class="screen-img" id="screen-8" loading="lazy" />
+        </div>
+        <div class="phone-home-bar"></div>
+      </div>
+      <!-- Floating cards -->
+      <div class="float-card float-card-top" aria-hidden="true">
+        <div class="float-icon" style="background:rgba(200,241,53,0.15);">
+          <span class="material-symbols-outlined" style="color:#C8F135;font-size:18px;">photo_camera</span>
+        </div>
+        <div>
+          <div class="float-title">AI Scanned</div>
+          <div class="float-sub">Chapati · 224 kcal</div>
+        </div>
+      </div>
+      <div class="float-card float-card-bottom" aria-hidden="true">
+        <div class="float-icon" style="background:rgba(79,142,247,0.15);">
+          <span class="material-symbols-outlined" style="color:#4F8EF7;font-size:18px;">auto_awesome</span>
+        </div>
+        <div>
+          <div class="float-title">AI Coach</div>
+          <div class="float-sub" style="color:#4F8EF7;">Protein goal met! 🎉</div>
+        </div>
+      </div>
+      <!-- Screen dots -->
+      <div class="screen-dots" aria-label="Screenshot navigation">
+        <button class="dot active" data-screen="0" aria-label="Screenshot 1"></button>
+        <button class="dot" data-screen="1" aria-label="Screenshot 2"></button>
+        <button class="dot" data-screen="2" aria-label="Screenshot 3"></button>
+        <button class="dot" data-screen="3" aria-label="Screenshot 4"></button>
+        <button class="dot" data-screen="4" aria-label="Screenshot 5"></button>
+        <button class="dot" data-screen="5" aria-label="Screenshot 6"></button>
+        <button class="dot" data-screen="6" aria-label="Screenshot 7"></button>
+        <button class="dot" data-screen="7" aria-label="Screenshot 8"></button>
+        <button class="dot" data-screen="8" aria-label="Screenshot 9"></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STATS BAR ===== -->
+<section class="stats-bar" aria-label="App statistics">
+  <div class="stats-inner">
+    <div class="stat-item">
+      <span class="stat-value" data-target="500000">0</span>
+      <span class="stat-suffix">+</span>
+      <span class="stat-label">Meals Logged</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-value" data-target="48" data-decimal="1">0</span>
+      <span class="stat-suffix">★</span>
+      <span class="stat-label">App Rating</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-value" data-target="50000">0</span>
+      <span class="stat-suffix">+</span>
+      <span class="stat-label">Active Users</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item stat-badge">
+      <span class="material-symbols-outlined" style="font-size:18px;">memory</span>
+      <span>Advanced AI Powered</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURES ===== -->
+<section class="features" id="features">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <span class="section-eyebrow">Core Features</span>
+      <h2 class="section-title">Everything You Need to <span class="text-gradient">Hit Your Goals</span></h2>
+      <p class="section-subtitle">Precision tracking tools designed for people who demand results without the friction.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card reveal" style="--delay:0ms">
+        <div class="feature-icon-wrap" style="--icon-color:rgba(79,142,247,0.15);--icon-border:rgba(79,142,247,0.3);">
+          <span class="material-symbols-outlined" style="color:#93C5FD;font-size:26px;">photo_camera</span>
+        </div>
+        <h3 class="feature-title">AI Photo Scan</h3>
+        <p class="feature-desc">Snap a picture of your meal. Our advanced AI technology instantly identifies ingredients and calculates calories and macros — no manual entry needed.</p>
+        <div class="feature-tag" style="color:#93C5FD;background:rgba(79,142,247,0.1);">Powered by Advanced AI</div>
+      </div>
+      <div class="feature-card reveal" style="--delay:80ms">
+        <div class="feature-icon-wrap" style="--icon-color:rgba(200,241,53,0.15);--icon-border:rgba(200,241,53,0.3);">
+          <span class="material-symbols-outlined" style="color:#C8F135;font-size:26px;">mic</span>
+        </div>
+        <h3 class="feature-title">Voice Meal Logging</h3>
+        <p class="feature-desc">Just say "I had a chicken salad with olive oil" and NutriVault parses the natural language into precise nutritional data in seconds.</p>
+        <div class="feature-tag" style="color:#C8F135;background:rgba(200,241,53,0.1);">Hands-Free Logging</div>
+      </div>
+      <div class="feature-card reveal" style="--delay:160ms">
+        <div class="feature-icon-wrap" style="--icon-color:rgba(139,92,246,0.15);--icon-border:rgba(139,92,246,0.3);">
+          <span class="material-symbols-outlined" style="color:#C4B5FD;font-size:26px;">barcode_scanner</span>
+        </div>
+        <h3 class="feature-title">Barcode Scanner</h3>
+        <p class="feature-desc">Scan any packaged product barcode and get instant nutritional info from our database of millions of verified food items. Zero guesswork.</p>
+        <div class="feature-tag" style="color:#C4B5FD;background:rgba(139,92,246,0.1);">3M+ Food Items</div>
+      </div>
+      <div class="feature-card reveal" style="--delay:240ms">
+        <div class="feature-icon-wrap" style="--icon-color:rgba(249,115,22,0.15);--icon-border:rgba(249,115,22,0.3);">
+          <span class="material-symbols-outlined" style="color:#FDBA74;font-size:26px;">pie_chart</span>
+        </div>
+        <h3 class="feature-title">Macro Tracking</h3>
+        <p class="feature-desc">Visualize your Carbs, Protein and Fats with beautiful color-coded chips and daily progress. Customize your macro targets to your exact goals.</p>
+        <div class="feature-tag" style="color:#FDBA74;background:rgba(249,115,22,0.1);">Custom Targets</div>
+      </div>
+      <div class="feature-card reveal" style="--delay:320ms">
+        <div class="feature-icon-wrap" style="--icon-color:rgba(6,182,212,0.15);--icon-border:rgba(6,182,212,0.3);">
+          <span class="material-symbols-outlined" style="color:#67E8F9;font-size:26px;">water_drop</span>
+        </div>
+        <h3 class="feature-title">Water & Exercise</h3>
+        <p class="feature-desc">Log your daily water intake and exercise calories with one tap. Track your hydration goals alongside your nutrition for a complete health picture.</p>
+        <div class="feature-tag" style="color:#67E8F9;background:rgba(6,182,212,0.1);">Full Health Picture</div>
+      </div>
+      <div class="feature-card reveal" style="--delay:400ms">
+        <div class="feature-icon-wrap" style="--icon-color:rgba(236,72,153,0.15);--icon-border:rgba(236,72,153,0.3);">
+          <span class="material-symbols-outlined" style="color:#F9A8D4;font-size:26px;">auto_awesome</span>
+        </div>
+        <h3 class="feature-title">AI Weight Coach</h3>
+        <p class="feature-desc">Get personalized calorie and macro budget recommendations based on your weight, goal, activity level, and metabolic profile — recalculated intelligently.</p>
+        <div class="feature-tag" style="color:#F9A8D4;background:rgba(236,72,153,0.1);">Smart Coaching</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== HOW IT WORKS (MFP alternating split layout with all 9 screens) ===== -->
+<section class="how-it-works" id="how-it-works">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <span class="section-eyebrow">How It Works</span>
+      <h2 class="section-title">Step-by-Step <span class="text-gradient">Experience</span></h2>
+      <p class="section-subtitle">Take a full tour of the NutriVault workflow and see how it helps you hit your goals.</p>
+    </div>
+
+    <div class="split-steps-container">
+      <!-- Step 1: Welcome -->
+      <div class="split-step reveal">
+        <div class="split-step-visual">
+          <div class="split-step-mockup">
+            <img src="assets/screenshots/m1_welcome.png" alt="Begin onboarding screen" />
+          </div>
+        </div>
+        <div class="split-step-text">
+          <div class="split-step-num">1</div>
+          <h3 class="split-step-title">Begin your journey</h3>
+          <p class="split-step-desc">Start with our premium onboarding experience designed to align your mind and body. Set up your basic details in seconds to kickstart tracking.</p>
+        </div>
+      </div>
+
+      <!-- Step 2: Goal Selection -->
+      <div class="split-step reverse reveal">
+        <div class="split-step-visual">
+          <div class="split-step-mockup">
+            <img src="assets/screenshots/m2_goal_select.png" alt="Select your target screen" />
+          </div>
+        </div>
+        <div class="split-step-text">
+          <div class="split-step-num">2</div>
+          <h3 class="split-step-title">Select your primary target</h3>
+          <p class="split-step-desc">Define your objective. Choose whether you want to lose body fat, maintain current weight with healthy lifestyle choices, or gain lean muscle mass.</p>
+        </div>
+      </div>
+
+      <!-- Step 3: Goal Profile -->
+      <div class="split-step reveal">
+        <div class="split-step-visual">
+          <div class="split-step-mockup">
+            <img src="assets/screenshots/m3_goal_profile.png" alt="Daily macro targets screen" />
+          </div>
+        </div>
+        <div class="split-step-text">
+          <div class="split-step-num">3</div>
+          <h3 class="split-step-title">Calculate your daily budget</h3>
+          <p class="split-step-desc">NutriVault builds a customized daily calorie budget and target macronutrients (Carbs, Protein, Fats, and Fiber) tailored to your physiology and goal.</p>
+        </div>
+      </div>
+
+      <!-- Step 4: Summary Dashboard -->
+      <div class="split-step reverse reveal">
+        <div class="split-step-visual">
+          <div class="split-step-mockup">
+            <img src="assets/screenshots/m4_summary.png" alt="Dynamic summary dashboard screen" />
+          </div>
+        </div>
+        <div class="split-step-text">
+          <div class="split-step-num">4</div>
+          <h3 class="split-step-title">Check your dashboard</h3>
+          <p class="split-step-desc">See your daily metrics in real time. A dynamic, glowing calorie ring shows remaining calories and live progress indicators keep your macro splits in check.</p>
+        </div>
+      </div>
+
+      <!-- Step 5: Log a Meal -->
+      <div class="split-step reveal">
+        <div class="split-step-visual">
+          <div class="split-step-mockup">
+            <img src="assets/screenshots/m5_log.png" alt="Frictionless logging shortcuts screen" />
+          </div>
+        </div>
+        <div class="split-step-text">
+          <div class="split-step-num">5</div>
+          <h3 class="split-step-title">Track meals in seconds</h3>
+          <p class="split-step-desc">Log breakfast, lunch, dinner, or snacks instantly. Access quick shortcuts for barcode scanning, AI photo scanning, hands-free voice logging, or smart database searches.</p>
+        </div>
+      </div>
+
+      <!-- Step 6: AI Meal Scan -->
+      <div class="split-step reverse reveal">
+        <div class="split-step-visual">
+          <div class="split-step-mockup">
+            <img src="assets/screenshots/m6_aiscan.png" alt="Vision AI food scanning screen" />
+          </div>
+        </div>
+        <div class="split-step-text">
+          <div class="split-step-num">6</div>
+          <h3 class="split-step-title">Scan food with vision AI</h3>
+          <p class="split-step-desc">Simply snap a photo of your plate. Our advanced vision AI instantly identifies the ingredients (like Chapati and curry) and estimates weights and portion sizes.</p>
+        </div>
+      </div>
+
+      <!-- Step 7: Nutrition Diary -->
+      <div class="split-step reveal">
+        <div class="split-step-visual">
+          <div class="split-step-mockup">
+            <img src="assets/screenshots/m7_diary.png" alt="Daily food journal screen" />
+          </div>
+        </div>
+        <div class="split-step-text">
+          <div class="split-step-num">7</div>
+          <h3 class="split-step-title">Review your daily Nutrition</h3>
+          <p class="split-step-desc">Browse your itemized daily food journal. Spot patterns in calorie densities, check specific meals logged, and review total calories added automatically.</p>
+        </div>
+      </div>
+
+      <!-- Step 8: AI Coaching -->
+      <div class="split-step reverse reveal">
+        <div class="split-step-visual">
+          <div class="split-step-mockup">
+            <img src="assets/screenshots/m8_aicoach.png" alt="Conversational AI coach screen" />
+          </div>
+        </div>
+        <div class="split-step-text">
+          <div class="split-step-num">8</div>
+          <h3 class="split-step-title">Get personalized AI coaching</h3>
+          <p class="split-step-desc">Consult your Conversational Coach for nutrition suggestions, review your Daily Nutrition Debriefs, and get direct weight advice based on your logs.</p>
+        </div>
+      </div>
+
+      <!-- Step 9: Progress & Analytics -->
+      <div class="split-step reveal">
+        <div class="split-step-visual">
+          <div class="split-step-mockup">
+            <img src="assets/screenshots/m9_progress.png" alt="Weight progress graphs screen" />
+          </div>
+        </div>
+        <div class="split-step-text">
+          <div class="split-step-num">9</div>
+          <h3 class="split-step-title">Analyze your progress trends</h3>
+          <p class="split-step-desc">Monitor weight trends over weeks or months with clean graphs, moving average trendlines, and a complete history timeline logging your accomplishments.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TESTIMONIALS ===== -->
+<section class="testimonials" id="testimonials">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <span class="section-eyebrow">Real Reviews</span>
+      <h2 class="section-title">Loved by <span class="text-gradient">Health Enthusiasts</span></h2>
+    </div>
+    <div class="reviews-grid">
+      <div class="review-card reveal" style="--delay:0ms">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">"The AI photo scan is mind-blowing. I photographed my daal-chawal and it detected every ingredient perfectly. This app understands Indian food!"</p>
+        <div class="review-author">
+          <div class="author-avatar" style="background:linear-gradient(135deg,#C8F135,#6B9900);">A</div>
+          <div>
+            <div class="author-name">Arjun S.</div>
+            <div class="author-meta">Mumbai · Weight Loss</div>
+          </div>
+        </div>
+      </div>
+      <div class="review-card reveal" style="--delay:120ms">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">"Finally an app that doesn't require me to type everything manually. Voice logging is a game-changer — I log meals while cooking. Lost 6kg in 2 months!"</p>
+        <div class="review-author">
+          <div class="author-avatar" style="background:linear-gradient(135deg,#4F8EF7,#1D4DB4);">P</div>
+          <div>
+            <div class="author-name">Priya M.</div>
+            <div class="author-meta">Bangalore · Muscle Gain</div>
+          </div>
+        </div>
+      </div>
+      <div class="review-card reveal" style="--delay:240ms">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">"The dark UI is gorgeous and the macro tracking is exactly what I needed for my gym prep. The barcode scanner works perfectly on Indian packaged foods too."</p>
+        <div class="review-author">
+          <div class="author-avatar" style="background:linear-gradient(135deg,#F9A8D4,#9D2563);">R</div>
+          <div>
+            <div class="author-name">Rahul K.</div>
+            <div class="author-meta">Delhi · Fitness Enthusiast</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section class="faq-section" id="faq">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <span class="section-eyebrow">Got Questions?</span>
+      <h2 class="section-title">Frequently Asked <span class="text-gradient">Questions</span></h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item reveal">
+        <button class="faq-question" aria-expanded="false" id="faq-q1">
+          Is NutriVault completely free?
+          <span class="faq-icon material-symbols-outlined">expand_more</span>
+        </button>
+        <div class="faq-answer" id="faq-a1" role="region">
+          <p>Yes! NutriVault is free to download and use with all core features including AI photo scan, barcode scanning, calorie tracking, and macro logging. A NutriVault Premium upgrade is available for an ad-free experience with unlimited AI coaching sessions.</p>
+        </div>
+      </div>
+      <div class="faq-item reveal" style="--delay:60ms">
+        <button class="faq-question" aria-expanded="false" id="faq-q2">
+          How accurate is the AI food recognition?
+          <span class="faq-icon material-symbols-outlined">expand_more</span>
+        </button>
+        <div class="faq-answer" id="faq-a2" role="region">
+          <p>NutriVault uses state-of-the-art vision AI technology for food recognition, which has been trained on millions of food images. It accurately identifies common Indian and international dishes, estimates portion sizes, and breaks down calorie and macro estimates. For packaged foods, the barcode scanner provides 100% accurate data from manufacturer labels.</p>
+        </div>
+      </div>
+      <div class="faq-item reveal" style="--delay:120ms">
+        <button class="faq-question" aria-expanded="false" id="faq-q3">
+          What data does NutriVault collect?
+          <span class="faq-icon material-symbols-outlined">expand_more</span>
+        </button>
+        <div class="faq-answer" id="faq-a3" role="region">
+          <p>We collect only the data you provide: your health profile (age, weight, height, goal) and meal logs. Your data is stored securely and is never sold to third parties. You can review our full <a href="https://nutrivault.techotd.in/privacy" style="color:#C8F135;">Privacy Policy</a> or delete your account and all data at any time.</p>
+        </div>
+      </div>
+      <div class="faq-item reveal" style="--delay:180ms">
+        <button class="faq-question" aria-expanded="false" id="faq-q4">
+          Does it work for Indian food?
+          <span class="faq-icon material-symbols-outlined">expand_more</span>
+        </button>
+        <div class="faq-answer" id="faq-a4" role="region">
+          <p>Absolutely! NutriVault was built with Indian cuisine in mind. The AI photo scan can recognize dishes like Daal, Sabzi, Roti, Biryani, Idli, and hundreds more. You can also search for Indian dishes by name or brand (like Haldiram's, MTR, etc.) through our food database.</p>
+        </div>
+      </div>
+      <div class="faq-item reveal" style="--delay:240ms">
+        <button class="faq-question" aria-expanded="false" id="faq-q5">
+          How do I delete my account?
+          <span class="faq-icon material-symbols-outlined">expand_more</span>
+        </button>
+        <div class="faq-answer" id="faq-a5" role="region">
+          <p>You can delete your account directly within the app by going to your Profile → Settings → Delete Account. This will permanently remove all your data from our servers within 30 days. You can also contact us at <a href="mailto:support@nutrivault.techotd.in" style="color:#C8F135;">support@nutrivault.techotd.in</a> for assistance.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== DOWNLOAD CTA ===== -->
+<section class="download-cta" id="download">
+  <div class="download-inner">
+    <div class="download-glow"></div>
+    <span class="section-eyebrow" style="color:rgba(255,255,255,0.6);">Available Now</span>
+    <h2 class="download-title">Start Your <span style="color:#C8F135;">Transformation</span> Today</h2>
+    <p class="download-subtitle">Free download. No credit card. No commitment. Just results.</p>
+    <div class="download-actions">
+      <a href="https://play.google.com/store/apps/details?id=com.nutrivault.app" class="btn-download" id="download-play-btn" target="_blank" rel="noopener noreferrer">
+        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3.18 23.76c.36.2.8.22 1.2.05L16.06 12 12.27 8.2 3.18 23.76zM20.44 10.16l-2.87-1.66-4.02 3.6 4.02 3.6 2.87-1.65c.82-.47.82-1.42 0-1.89zM1.3.9C1.11 1.16 1 1.52 1 1.96v20.08c0 .44.11.8.3 1.06l.08.07 11.24-11.2v-.26L1.38.83l-.08.07z" fill="currentColor"/></svg>
+        <div class="btn-download-text">
+          <span>GET IT ON</span>
+          <strong>Google Play</strong>
+        </div>
+      </a>
+    </div>
+    <p class="download-meta">
+      <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;color:#C8F135;">verified</span>
+      Android 8.0+ · Free · 50K+ Downloads
+    </p>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="#" class="nav-logo" aria-label="NutriVault">
+        <img src="assets/logo.png" alt="NutriVault" class="nav-logo-img" />
+        <span class="nav-logo-text">NutriVault</span>
+      </a>
+      <p class="footer-tagline">Precision nutrition tracking for modern lifestyles. Track smart, eat right, transform.</p>
+      <p class="footer-copy">© 2026 NutriVault. All rights reserved.</p>
+    </div>
+    <div class="footer-links-group">
+      <h4 class="footer-links-title">Product</h4>
+      <a href="#features" class="footer-link">Features</a>
+      <a href="#how-it-works" class="footer-link">How It Works</a>
+      <a href="#download" class="footer-link">Download App</a>
+    </div>
+    <div class="footer-links-group">
+      <h4 class="footer-links-title">Legal</h4>
+      <a href="https://nutrivault.techotd.in/privacy" class="footer-link" target="_blank" rel="noopener">Privacy Policy</a>
+      <a href="https://nutrivault.techotd.in/delete-account" class="footer-link" target="_blank" rel="noopener">Delete Account</a>
+      <a href="mailto:support@nutrivault.techotd.in" class="footer-link">Contact Us</a>
+    </div>
+    <div class="footer-links-group">
+      <h4 class="footer-links-title">Download</h4>
+      <a href="#download" class="btn-primary" style="padding:10px 20px;font-size:14px;" id="footer-play-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.36.2.8.22 1.2.05L16.06 12 12.27 8.2 3.18 23.76zM20.44 10.16l-2.87-1.66-4.02 3.6 4.02 3.6 2.87-1.65c.82-.47.82-1.42 0-1.89zM1.3.9C1.11 1.16 1 1.52 1 1.96v20.08c0 .44.11.8.3 1.06l.08.07 11.24-11.2v-.26L1.38.83l-.08.07z"/></svg>
+        Google Play
+      </a>
+      <p style="font-size:12px;color:#8A9BB5;margin-top:8px;">Android 8.0+ · Free</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>Built with ❤️ for health-conscious people everywhere.</p>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
