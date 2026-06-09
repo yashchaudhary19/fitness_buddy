@@ -49,7 +49,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
             ),
             const SizedBox(height: 4),
             Text(
-              "nutritrack",
+              "nutrivault",
               style: GoogleFonts.outfit(
                 fontSize: 36,
                 fontWeight: FontWeight.w900,
@@ -327,7 +327,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        "nutritrack",
+                                        "nutrivault",
                                         style: GoogleFonts.outfit(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w900,

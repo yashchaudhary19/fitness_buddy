@@ -34,9 +34,9 @@ class AdService {
   /// Get the Banner Ad Unit ID based on the current platform.
   static String get bannerAdUnitId {
     if (Platform.isAndroid) {
-      return 'ca-app-pub-3940256099942544/6300978111'; // Android Test ID
+      return 'ca-app-pub-1237832395857766/9863197121'; // Android Production ID
     } else if (Platform.isIOS) {
-      return 'ca-app-pub-3940256099942544/2934735716'; // iOS Test ID
+      return 'ca-app-pub-1237832395857766/9863197121'; // iOS Production ID
     }
     return '';
   }
@@ -44,9 +44,9 @@ class AdService {
   /// Get the Interstitial Ad Unit ID based on the current platform.
   static String get interstitialAdUnitId {
     if (Platform.isAndroid) {
-      return 'ca-app-pub-3940256099942544/1033173712'; // Android Test ID
+      return 'ca-app-pub-1237832395857766/9008601838'; // Android Production ID
     } else if (Platform.isIOS) {
-      return 'ca-app-pub-3940256099942544/4411468910'; // iOS Test ID
+      return 'ca-app-pub-1237832395857766/9008601838'; // iOS Production ID
     }
     return '';
   }
@@ -54,9 +54,9 @@ class AdService {
   /// Get the Rewarded Ad Unit ID based on the current platform.
   static String get rewardedAdUnitId {
     if (Platform.isAndroid) {
-      return 'ca-app-pub-3940256099942544/5224354917'; // Android Test ID
+      return 'ca-app-pub-1237832395857766/7592257001'; // Android Production ID
     } else if (Platform.isIOS) {
-      return 'ca-app-pub-3940256099942544/1712485313'; // iOS Test ID
+      return 'ca-app-pub-1237832395857766/7592257001'; // iOS Production ID
     }
     return '';
   }

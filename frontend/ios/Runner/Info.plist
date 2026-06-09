@@ -71,6 +71,6 @@
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>This application needs access to speech recognition to transcribe your voice log.</string>
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<string>ca-app-pub-1237832395857766~2377109251</string>
 </dict>
 </plist>

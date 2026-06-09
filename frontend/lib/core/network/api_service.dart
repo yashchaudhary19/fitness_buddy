@@ -41,6 +41,57 @@ class ApiService {
 
   ApiService(this._dio);
 
+  String _sanitizeErrorMessage(String rawMessage, {int? statusCode}) {
+    final lower = rawMessage.toLowerCase();
+    
+    // Connection refused / SocketException
+    if (lower.contains("socketexception") || 
+        lower.contains("connection refused") || 
+        lower.contains("errno = 111") ||
+        lower.contains("failed host lookup")) {
+      return "Unable to connect to the server. Please check your network connection and try again.";
+    }
+    
+    // DB / SQL Dump errors
+    if (lower.contains("sql") || 
+        lower.contains("database") || 
+        lower.contains("relation") || 
+        lower.contains("postgres") || 
+        lower.contains("sqlite") || 
+        lower.contains("sqlalchemy") || 
+        lower.contains("table") || 
+        lower.contains("column")) {
+      return "A database configuration error occurred. Please try again later.";
+    }
+    
+    // Format / Parsing errors
+    if (lower.contains("formatexception") || 
+        lower.contains("unexpected character") || 
+        lower.contains("type 'string' is not a subtype")) {
+      return "Received invalid data from the server. Please try again later.";
+    }
+    
+    // Internal Server errors (500)
+    if (statusCode == 500 || lower.contains("internal server error")) {
+      return "The server encountered an error processing this request. Please try again later.";
+    }
+    
+    // Clean up any developer exception prefixes
+    String clean = rawMessage;
+    final prefixes = ["apiapiapiapiapiapiapiapi", "ApiException: ", "Exception: ", "TypeError: ", "FormatException: ", "Error: "];
+    for (final prefix in prefixes) {
+      if (clean.startsWith(prefix)) {
+        clean = clean.substring(prefix.length);
+      }
+    }
+    
+    if (clean.trim().isEmpty) {
+      return "An unexpected error occurred. Please try again.";
+    }
+    
+    return clean;
+  }
+
   ApiException _handleDioError(DioException e) {
     final response = e.response;
     if (response != null) {
@@ -49,7 +100,7 @@ class ApiService {
         if (data is Map<String, dynamic>) {
           final errorMsg = data['detail'] ?? data['error'] ?? data['message'] ?? e.message;
           return ApiException(
-            errorMsg.toString(),
+            _sanitizeErrorMessage(errorMsg.toString(), statusCode: response.statusCode),
             statusCode: response.statusCode,
             errorCode: data['error'],
           );
@@ -69,10 +120,8 @@ class ApiService {
       case DioExceptionType.connectionError:
         return ApiException("Cannot reach the server. Please check your network or verify the backend is running.");
       default:
-        if (e.message != null && e.message!.contains("SocketException")) {
-          return ApiException("Network connection error. Please check your internet connection.");
-        }
-        return ApiException("A network error occurred. Please try again.");
+        final msg = e.message ?? "";
+        return ApiException(_sanitizeErrorMessage(msg));
     }
   }
 
@@ -83,7 +132,7 @@ class ApiService {
     } on DioException catch (e) {
       throw _handleDioError(e);
     } catch (e) {
-      throw ApiException(e.toString());
+      throw ApiException(_sanitizeErrorMessage(e.toString()));
     }
   }
 
@@ -94,7 +143,7 @@ class ApiService {
     } on DioException catch (e) {
       throw _handleDioError(e);
     } catch (e) {
-      throw ApiException(e.toString());
+      throw ApiException(_sanitizeErrorMessage(e.toString()));
     }
   }
 
@@ -105,7 +154,7 @@ class ApiService {
     } on DioException catch (e) {
       throw _handleDioError(e);
     } catch (e) {
-      throw ApiException(e.toString());
+      throw ApiException(_sanitizeErrorMessage(e.toString()));
     }
   }
 
@@ -116,7 +165,7 @@ class ApiService {
     } on DioException catch (e) {
       throw _handleDioError(e);
     } catch (e) {
-      throw ApiException(e.toString());
+      throw ApiException(_sanitizeErrorMessage(e.toString()));
     }
   }
 
@@ -150,7 +199,7 @@ class ApiService {
     } on DioException catch (e) {
       throw _handleDioError(e);
     } catch (e) {
-      throw ApiException(e.toString());
+      throw ApiException(_sanitizeErrorMessage(e.toString()));
     }
   }
 }

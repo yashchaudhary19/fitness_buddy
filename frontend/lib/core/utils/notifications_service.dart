@@ -42,7 +42,7 @@ class NotificationsService {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "NutriTrack Reminder",
+                    "NutriVault Reminder",
                     style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
                   ),
                   Text(

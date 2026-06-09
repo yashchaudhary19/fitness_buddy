@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 
 import 'package:frontend/core/theme/app_theme.dart';
 import 'package:frontend/features/profile/providers/profile_provider.dart';
@@ -240,6 +242,57 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             ),
                           ),
                           const SizedBox(height: 24),
+
+                          // Privacy Policy button
+                          SizedBox(
+                            width: double.infinity,
+                            height: 56,
+                            child: OutlinedButton.icon(
+                              onPressed: () async {
+                                final url = Uri.parse('https://nutrivault.techotd.in/privacy');
+                                try {
+                                  if (await canLaunchUrl(url)) {
+                                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                                  } else {
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          backgroundColor: AppColors.error,
+                                          content: Text(
+                                            "Could not launch Privacy Policy link.",
+                                            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  }
+                                } catch (e) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        backgroundColor: AppColors.error,
+                                        content: Text(
+                                          "Error opening Privacy Policy.",
+                                          style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.white70,
+                                side: const BorderSide(color: AppColors.darkBorder, width: 1.5),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              ),
+                              icon: const Icon(LucideIcons.shield, size: 18),
+                              label: Text(
+                                "Privacy Policy",
+                                style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
 
                           // Log Out button
                           SizedBox(

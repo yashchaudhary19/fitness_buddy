@@ -170,7 +170,7 @@ class SummaryNotifier extends StateNotifier<SummaryState> {
         String displayError = errorStr.replaceAll("ApiException: ", "");
         
         if (errorStr.contains("Connection refused") || errorStr.contains("SocketException")) {
-          displayError = "Connection failed. Run 'adb reverse tcp:8000 tcp:8000'";
+          displayError = "Connection failed. Please check your internet connection.";
         }
 
         state = state.copyWith(

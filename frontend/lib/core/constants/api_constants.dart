@@ -1,17 +1,5 @@
-import 'dart:io';
-import 'package:flutter/foundation.dart';
-
 class ApiConstants {
-  static String get baseUrl {
-    if (kIsWeb) {
-      return "http://localhost:8000";
-    }
-    if (Platform.isAndroid) {
-      // Use 127.0.0.1 with 'adb reverse tcp:8000 tcp:8000' to tunnel connection via ADB
-      return "http://127.0.0.1:8000";
-    }
-    return "http://127.0.0.1:8000";
-  }
+  static const String baseUrl = "https://nutrivault.techotd.in";
 
   // Auth paths
   static const String register = "/api/auth/register";

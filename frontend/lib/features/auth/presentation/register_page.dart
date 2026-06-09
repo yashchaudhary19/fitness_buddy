@@ -121,7 +121,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 const SizedBox(height: 8),
                 Center(
                   child: Text(
-                    "Join NutriTrack and start tracking today",
+                    "Join NutriVault and start tracking today",
                     style: GoogleFonts.outfit(
                       fontSize: 16,
                       color: AppColors.darkTextSecondary,

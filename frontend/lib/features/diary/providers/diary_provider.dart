@@ -233,7 +233,7 @@ class DiaryNotifier extends StateNotifier<DiaryState> {
         String displayError = errorStr.replaceAll("ApiException: ", "");
         
         if (errorStr.contains("Connection refused") || errorStr.contains("SocketException")) {
-          displayError = "Connection to server failed. Please ensure 'adb reverse tcp:8000 tcp:8000' is running.";
+          displayError = "Connection to server failed. Please check your internet connection.";
         }
 
         state = state.copyWith(

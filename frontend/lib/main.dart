@@ -12,26 +12,61 @@ void main() async {
   // Ensure Flutter engine bindings are fully initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize AdMob SDK
-  await AdService.initialize();
+  try {
+    // Initialize AdMob SDK
+    await AdService.initialize();
 
-  // Initialize Hive database
-  await Hive.initFlutter();
-  
-  // Initialize Hive token box
-  await TokenStorage.init();
+    // Initialize Hive database
+    await Hive.initFlutter();
+    
+    // Initialize Hive token box
+    await TokenStorage.init();
 
-  // Initialize Supabase
-  await Supabase.initialize(
-    url: 'https://pxcwkgrpkkoukgaqicky.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4Y3drZ3Jwa2tvdWtnYXFpY2t5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MDMxNTMsImV4cCI6MjA5NTI3OTE1M30.jcQliptd6QNZ6B08KtwYmZl4EBwgysMRLZQb7A93J-0',
-  );
+    // Initialize Supabase
+    await Supabase.initialize(
+      url: 'https://pxcwkgrpkkoukgaqicky.supabase.co',
+      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4Y3drZ3Jwa2tvdWtnYXFpY2t5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MDMxNTMsImV4cCI6MjA5NTI3OTE1M30.jcQliptd6QNZ6B08KtwYmZl4EBwgysMRLZQb7A93J-0',
+    );
 
-  runApp(
-    const ProviderScope(
-      child: MyApp(),
-    ),
-  );
+    runApp(
+      const ProviderScope(
+        child: MyApp(),
+      ),
+    );
+  } catch (e, stackTrace) {
+    runApp(
+      MaterialApp(
+        home: Scaffold(
+          body: SafeArea(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error, color: Colors.red, size: 64),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Startup Error:\n$e',
+                        style: const TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Stacktrace:\n$stackTrace',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class MyApp extends ConsumerWidget {

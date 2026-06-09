@@ -14,6 +14,7 @@ import 'package:frontend/features/diary/presentation/scan_meal_page.dart';
 import 'package:frontend/features/diary/presentation/scan_barcode_page.dart';
 import 'package:frontend/features/diary/presentation/water_logging_page.dart';
 import 'package:frontend/features/diary/presentation/add_exercise_page.dart';
+import 'package:frontend/features/dashboard/presentation/premium_page.dart';
 
 // Auth state provider synchronized with TokenStorage on startup
 final authStateProvider = StateProvider<AuthState>((ref) {
@@ -113,6 +114,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/add-exercise',
         builder: (context, state) => const AddExercisePage(),
+      ),
+      GoRoute(
+        path: '/premium',
+        builder: (context, state) => const PremiumPage(),
       ),
     ],
   );

@@ -51,14 +51,10 @@ class _SplashPageState extends ConsumerState<SplashPage> with SingleTickerProvid
             ScaleTransition(
               scale: _pulseAnimation,
               child: Container(
-                padding: const EdgeInsets.all(24),
+                width: 120,
+                height: 120,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.15),
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppColors.primary.withOpacity(0.5),
-                    width: 2,
-                  ),
                   boxShadow: [
                     BoxShadow(
                       color: AppColors.primary.withOpacity(0.3),
@@ -67,10 +63,11 @@ class _SplashPageState extends ConsumerState<SplashPage> with SingleTickerProvid
                     ),
                   ],
                 ),
-                child: const Icon(
-                  LucideIcons.activity,
-                  size: 64,
-                  color: AppColors.primary,
+                child: ClipOval(
+                  child: Image.asset(
+                    "assets/images/app_logo.jpg",
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ),
@@ -78,7 +75,7 @@ class _SplashPageState extends ConsumerState<SplashPage> with SingleTickerProvid
             
             // Brand Title
             Text(
-              "NutriTrack",
+              "NutriVault",
               style: GoogleFonts.outfit(
                 fontSize: 36,
                 fontWeight: FontWeight.bold,

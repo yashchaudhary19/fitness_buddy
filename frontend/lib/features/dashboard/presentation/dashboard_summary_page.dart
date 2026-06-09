@@ -9,6 +9,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:frontend/core/ads/ad_service.dart';
 import 'package:frontend/core/theme/app_theme.dart';
 import 'package:frontend/features/dashboard/providers/summary_provider.dart';
+import 'package:frontend/features/auth/providers/auth_provider.dart';
 
 class DashboardSummaryPage extends ConsumerStatefulWidget {
   const DashboardSummaryPage({super.key});
@@ -71,20 +72,100 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
       dateHeader = "Tomorrow";
     }
 
+    final authState = ref.watch(authProvider);
+    final userName = ref.read(authProvider.notifier).currentUser?.name ?? '';
+    final userInitial = userName.trim().isNotEmpty ? userName.trim()[0].toUpperCase() : 'Y';
+
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
-      appBar: AppBar(
-        title: Text(
-          "Dashboard",
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 24),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.refreshCw, size: 20),
-            onPressed: notifier.fetchSummary,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(120),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Avatar Button
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundColor: const Color(0xFF0F766E), // Dark Teal / Cyan background matching image Y initial
+                      child: Text(
+                        userInitial,
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    // lowercase app name in blue
+                    Text(
+                      "nutrivault",
+                      style: GoogleFonts.outfit(
+                        color: const Color(0xFF3B82F6), // Brand blue
+                        fontWeight: FontWeight.w900,
+                        fontSize: 26,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    // Notification bell
+                    IconButton(
+                      icon: const Icon(LucideIcons.bell, color: Colors.white),
+                      onPressed: () {
+                        // Action for notification
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Start Free Trial Button (golden-yellow gradient pill)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Container(
+                  width: double.infinity,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(22),
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFFFDE047), // Yellow 300
+                        Color(0xFFFBBF24), // Amber 400
+                        Color(0xFFF59E0B), // Amber 500
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () => context.push('/premium'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: Colors.black,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(22),
+                      ),
+                      padding: EdgeInsets.zero,
+                    ),
+                    child: Text(
+                      "Start Free Trial",
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-        ],
+        ),
       ),
       body: SafeArea(
         child: Column(
@@ -545,7 +626,7 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
             ),
             GestureDetector(
               onTap: () {
-                // TODO: navigate to Premium page when implemented
+                context.push('/premium');
               },
               child: Text(
                 "Go Premium",
