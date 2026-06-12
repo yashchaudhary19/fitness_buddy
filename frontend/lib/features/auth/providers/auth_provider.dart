@@ -42,8 +42,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         debugPrint('Supabase Session detected! Exchanging with backend...');
         try {
           await _exchangeSupabaseToken(token);
-        } catch (e) {
+        } catch (e, stackTrace) {
           debugPrint('Error exchanging Supabase token with backend: $e');
+          debugPrint('Stacktrace: $stackTrace');
         }
       }
     });
@@ -60,7 +61,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // Validate token by fetching the profile
       final userResponse = await _apiService.get(ApiConstants.me);
       if (userResponse.success && userResponse.data != null) {
-        currentUser = User.fromJson(userResponse.data as Map<String, dynamic>);
+        final rawUser = userResponse.data;
+        if (rawUser is! Map) {
+          throw ApiException('Expected profile data to be a Map');
+        }
+        currentUser = User.fromJson(Map<String, dynamic>.from(rawUser));
         final onboardingCompleted = !TokenStorage.needsOnboarding;
         
         // Check if the user already has a goal set up on the backend
@@ -116,8 +121,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
 
       if (response.success && response.data != null) {
-        final resData = response.data as Map<String, dynamic>;
-        final userMap = resData['user'] as Map<String, dynamic>;
+        final rawData = response.data;
+        if (rawData is! Map) {
+          throw ApiException('Expected response data to be a Map');
+        }
+        final resData = Map<String, dynamic>.from(rawData);
+        final rawUser = resData['user'];
+        if (rawUser is! Map) {
+          throw ApiException('Expected user field to be a Map');
+        }
+        final userMap = Map<String, dynamic>.from(rawUser);
         currentUser = User.fromJson(userMap);
 
         await TokenStorage.saveTokens(
@@ -148,8 +161,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
 
       if (response.success && response.data != null) {
-        final resData = response.data as Map<String, dynamic>;
-        final userMap = resData['user'] as Map<String, dynamic>;
+        final rawData = response.data;
+        if (rawData is! Map) {
+          throw ApiException('Expected response data to be a Map');
+        }
+        final resData = Map<String, dynamic>.from(rawData);
+        final rawUser = resData['user'];
+        if (rawUser is! Map) {
+          throw ApiException('Expected user field to be a Map');
+        }
+        final userMap = Map<String, dynamic>.from(rawUser);
         currentUser = User.fromJson(userMap);
 
         await TokenStorage.saveTokens(
@@ -188,9 +209,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> _exchangeSupabaseToken(String supabaseToken) async {
-    // If the state is already authenticated and we have currentUser, skip
-    if (state == AuthState.authenticated && currentUser != null) {
-      debugPrint('Google Sign-In: Already authenticated, skipping backend token exchange');
+    // If the state is already authenticated or needs onboarding and we have currentUser, skip
+    if ((state == AuthState.authenticated || state == AuthState.needsOnboarding) && currentUser != null) {
+      debugPrint('Google Sign-In: Already authenticated/onboarding, skipping backend token exchange');
       return;
     }
 
@@ -207,8 +228,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       if (response.success && response.data != null) {
         debugPrint('Google Sign-In: backend exchange success!');
-        final resData = response.data as Map<String, dynamic>;
-        final userMap = resData['user'] as Map<String, dynamic>;
+        final rawData = response.data;
+        if (rawData is! Map) {
+          throw ApiException('Expected response data to be a Map, but got ${rawData.runtimeType}');
+        }
+        final resData = Map<String, dynamic>.from(rawData);
+        final rawUser = resData['user'];
+        if (rawUser is! Map) {
+          throw ApiException('Expected user field to be a Map, but got ${rawUser.runtimeType}');
+        }
+        final userMap = Map<String, dynamic>.from(rawUser);
         currentUser = User.fromJson(userMap);
 
         await TokenStorage.saveTokens(
@@ -224,7 +253,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         debugPrint('Google Sign-In: backend exchange failed: ${response.error}');
         throw ApiException(response.error ?? 'Google sign-in token exchange failed.');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('Google Sign-In: ERROR in exchange: $e');
+      debugPrint('Google Sign-In: StackTrace: $stackTrace');
       _ref.read(authStateProvider.notifier).state = AuthState.unauthenticated;
       state = AuthState.unauthenticated;
       rethrow;

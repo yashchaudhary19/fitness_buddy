@@ -33,4 +33,14 @@ async def close_redis() -> None:
 
 def get_redis() -> aioredis.Redis:
     """Dependency injection getter for Redis client."""
+    global redis_client
+    if redis_client is None:
+        try:
+            redis_client = aioredis.from_url(
+                settings.REDIS_URL,
+                decode_responses=True,
+                socket_timeout=5.0
+            )
+        except Exception as e:
+            logger.error(f"Lazy Redis connection failed: {e}")
     return redis_client
