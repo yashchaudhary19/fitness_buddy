@@ -7,6 +7,7 @@ from app.models.exercise import ExerciseLog, ExerciseSet, ExerciseType
 from app.models.weight import WeightEntry
 from app.models.measurement import BodyMeasurement
 from app.models.token import RefreshToken
+from app.models.app_settings import AppSettings
 
 __all__ = [
     "Base",
@@ -27,4 +28,5 @@ __all__ = [
     "WeightEntry",
     "BodyMeasurement",
     "RefreshToken",
+    "AppSettings",
 ]

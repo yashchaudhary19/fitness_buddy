@@ -28,6 +28,7 @@ export default function Sidebar() {
     { name: 'Analytics', href: '/analytics', icon: BarChart3 },
     { name: 'Revenue', href: '/revenue', icon: DollarSign },
     { name: 'Reports', href: '/reports', icon: AlertTriangle },
+    { name: 'Settings', href: '/settings', icon: Settings },
   ];
 
   return (

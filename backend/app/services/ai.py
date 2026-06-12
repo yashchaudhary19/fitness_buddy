@@ -21,14 +21,46 @@ logger = logging.getLogger("nutritrack.ai_service")
 class AIService:
     def __init__(self, db: AsyncSession):
         self.db = db
-        # Handle dummy/placeholder API key from .env
+        # Initial defaults loaded from settings (can be overridden dynamically by database)
+        self.provider = "gemini"
         raw_key = settings.GEMINI_API_KEY
         if raw_key == "your-gemini-api-key-here" or not raw_key:
             self.api_key = None
         else:
             self.api_key = raw_key
-            
         self.model = settings.GEMINI_MODEL
+
+    async def _load_settings(self) -> None:
+        """
+        Dynamically load AI settings from the database (app_settings table)
+        and fall back to config settings if not present or database fails.
+        """
+        self.provider = "gemini"
+        raw_key = settings.GEMINI_API_KEY
+        self.api_key = None if (raw_key == "your-gemini-api-key-here" or not raw_key) else raw_key
+        self.model = settings.GEMINI_MODEL
+
+        if self.db is None:
+            return
+
+        try:
+            from app.models.app_settings import AppSettings
+            from sqlalchemy import select
+            
+            stmt = select(AppSettings).where(AppSettings.id == "active_settings")
+            result = await self.db.execute(stmt)
+            db_settings = result.scalars().first()
+
+            if db_settings:
+                self.provider = db_settings.ai_provider
+                if self.provider == "claude":
+                    self.model = db_settings.claude_model or "claude-3-5-sonnet-20241022"
+                    self.api_key = db_settings.claude_api_key or os.getenv("CLAUDE_API_KEY") or None
+                else:
+                    self.model = db_settings.gemini_model or "gemini-flash-latest"
+                    self.api_key = db_settings.gemini_api_key or raw_key or None
+        except Exception as e:
+            logger.error(f"Failed to load dynamic settings from database: {e}. Using .env config values.")
 
     def _clean_json(self, raw_text: str) -> str:
         """Strip markdown codeblock wrappers and clean JSON string from AI model output."""
@@ -52,18 +84,121 @@ class AIService:
         cleaned = re.sub(r',\s*([\]}])', r'\1', cleaned)
         return cleaned
 
+    async def _call_llm(
+        self,
+        messages: List[Dict[str, Any]],
+        response_format: Optional[Dict[str, Any]] = None,
+        max_tokens: Optional[int] = 2000
+    ) -> str:
+        """Route request to active provider (Gemini or Claude) based on database settings."""
+        await self._load_settings()
+
+        if self.provider == "claude":
+            return await self._call_claude(messages, max_tokens)
+        else:
+            return await self._call_gemini(messages, response_format, max_tokens)
+
+    async def _call_claude(
+        self,
+        messages: List[Dict[str, Any]],
+        max_tokens: Optional[int] = 2000
+    ) -> str:
+        """Helper to invoke Claude API via Anthropic Messages endpoint."""
+        if not self.api_key:
+            raise ValueError("CLAUDE_API_KEY is not configured.")
+
+        url = "https://api.anthropic.com/v1/messages"
+        
+        # Convert system and user messages into Anthropic structure
+        system_prompt = ""
+        claude_messages = []
+
+        for msg in messages:
+            role = msg.get("role")
+            content = msg.get("content")
+
+            if role == "system":
+                system_prompt = content
+            elif role in ("user", "assistant"):
+                # Map role labels: assistant in OpenAI/Gemini is assistant in Claude
+                claude_role = "assistant" if role == "assistant" else "user"
+                
+                parts = []
+                if isinstance(content, str):
+                    parts.append({"type": "text", "text": content})
+                elif isinstance(content, list):
+                    for part in content:
+                        part_type = part.get("type")
+                        if part_type == "text":
+                            parts.append({"type": "text", "text": part.get("text")})
+                        elif part_type == "image_url":
+                            url_val = part.get("image_url", {}).get("url", "")
+                            if url_val.startswith("data:"):
+                                header_part, base64_data = url_val.split(",", 1)
+                                mime_type = header_part.split(";")[0].split(":")[1]
+                                parts.append({
+                                    "type": "image",
+                                    "source": {
+                                        "type": "base64",
+                                        "media_type": mime_type,
+                                        "data": base64_data
+                                    }
+                                })
+                            else:
+                                parts.append({"type": "text", "text": f"[Image URL: {url_val}]"})
+                
+                claude_messages.append({
+                    "role": claude_role,
+                    "content": parts
+                })
+
+        payload = {
+            "model": self.model,
+            "max_tokens": max_tokens,
+            "messages": claude_messages
+        }
+        if system_prompt:
+            payload["system"] = system_prompt
+
+        headers = {
+            "x-api-key": self.api_key,
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json"
+        }
+
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            response = await client.post(url, headers=headers, json=payload)
+            if response.status_code == 429:
+                logger.warning(f"Claude API returned rate limit error (429): {response.text}")
+                raise HTTPException(
+                    status_code=429,
+                    detail="Claude API rate limit exceeded. Please try again in a few moments."
+                )
+            elif response.status_code != 200:
+                logger.error(f"Claude API returned error status {response.status_code}: {response.text}")
+                raise HTTPException(
+                    status_code=502,
+                    detail=f"Claude Service communication error: {response.text}"
+                )
+
+            res_json = response.json()
+            content_list = res_json.get("content", [])
+            if not content_list:
+                raise ValueError("Claude API returned empty response content.")
+            
+            return content_list[0].get("text", "")
+
     async def _call_gemini(
         self,
         messages: List[Dict[str, Any]],
         response_format: Optional[Dict[str, Any]] = None,
-        model: Optional[str] = None,
         max_tokens: Optional[int] = 2000
     ) -> str:
         """Helper to invoke direct Google Gemini API via native generateContent endpoint."""
         if not self.api_key:
             raise ValueError("GEMINI_API_KEY is not configured.")
 
-        selected_model = model or self.model
+        selected_model = self.model
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{selected_model}:generateContent"
         
         # Convert OpenAI messages to Gemini native format
@@ -129,7 +264,13 @@ class AIService:
 
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(url, headers=headers, json=payload)
-            if response.status_code != 200:
+            if response.status_code == 429:
+                logger.warning(f"Gemini API returned quota error (429): {response.text}")
+                raise HTTPException(
+                    status_code=429,
+                    detail="AI scan quota exceeded. Please try again in a few moments."
+                )
+            elif response.status_code != 200:
                 logger.error(f"Gemini API returned error status {response.status_code}: {response.text}")
                 raise HTTPException(
                     status_code=502,
@@ -416,10 +557,9 @@ class AIService:
         ]
 
         try:
-            raw_res = await self._call_gemini(
+            raw_res = await self._call_llm(
                 messages,
-                response_format={"type": "json_object"},
-                model=self.model
+                response_format={"type": "json_object"}
             )
             cleaned = self._clean_json(raw_res)
             try:
@@ -560,7 +700,7 @@ class AIService:
         ]
 
         try:
-            raw_res = await self._call_gemini(messages, response_format={"type": "json_object"})
+            raw_res = await self._call_llm(messages, response_format={"type": "json_object"})
             cleaned = self._clean_json(raw_res)
             return json.loads(cleaned)
         except Exception as e:
@@ -700,7 +840,7 @@ class AIService:
         ]
         
         try:
-            return await self._call_gemini(gemini_messages)
+            return await self._call_llm(gemini_messages)
         except Exception as e:
             logger.error(f"Chat AI call failed: {e}")
             return offline_reply()
@@ -809,7 +949,7 @@ class AIService:
         ]
         
         try:
-            raw_res = await self._call_gemini(messages, response_format={"type": "json_object"})
+            raw_res = await self._call_llm(messages, response_format={"type": "json_object"})
             cleaned = self._clean_json(raw_res)
             return json.loads(cleaned)
         except Exception as e:
@@ -882,7 +1022,7 @@ class AIService:
         ]
         
         try:
-            raw_res = await self._call_gemini(messages, response_format={"type": "json_object"})
+            raw_res = await self._call_llm(messages, response_format={"type": "json_object"})
             cleaned = self._clean_json(raw_res)
             return json.loads(cleaned)
         except Exception as e:

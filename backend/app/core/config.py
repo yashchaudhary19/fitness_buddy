@@ -42,7 +42,7 @@ class Settings(BaseSettings):
 
     # Google Gemini API
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-2.5-flash"
+    GEMINI_MODEL: str = "gemini-flash-latest"
 
     # Cloudinary (Progress Photos & Meal Scan Images)
     CLOUDINARY_CLOUD_NAME: str = ""

@@ -71,17 +71,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
             _ref.read(authStateProvider.notifier).state = AuthState.authenticated;
             state = AuthState.authenticated;
           } else {
-            if (onboardingCompleted) {
-              _ref.read(authStateProvider.notifier).state = AuthState.authenticated;
-              state = AuthState.authenticated;
-            } else {
-              _ref.read(authStateProvider.notifier).state = AuthState.needsOnboarding;
-              state = AuthState.needsOnboarding;
-            }
+            await TokenStorage.setNeedsOnboarding(true);
+            _ref.read(authStateProvider.notifier).state = AuthState.needsOnboarding;
+            state = AuthState.needsOnboarding;
           }
         } on ApiException catch (e) {
           // If goal endpoint returns 404, we need onboarding
           if (e.statusCode == 404) {
+            await TokenStorage.setNeedsOnboarding(true);
+            _ref.read(authStateProvider.notifier).state = AuthState.needsOnboarding;
+            state = AuthState.needsOnboarding;
+          } else {
+            // General failure, fall back to authenticated if token is valid and onboarding completed
             if (onboardingCompleted) {
               _ref.read(authStateProvider.notifier).state = AuthState.authenticated;
               state = AuthState.authenticated;
@@ -89,19 +90,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
               _ref.read(authStateProvider.notifier).state = AuthState.needsOnboarding;
               state = AuthState.needsOnboarding;
             }
-          } else {
-            // General failure, fall back to authenticated if token is valid
-            _ref.read(authStateProvider.notifier).state = AuthState.authenticated;
-            state = AuthState.authenticated;
           }
         }
       } else {
         await logout();
       }
     } catch (_) {
-      // If offline or request fails, assume authenticated if we have a token
-      _ref.read(authStateProvider.notifier).state = AuthState.authenticated;
-      state = AuthState.authenticated;
+      // If offline or request fails, assume authenticated if we have a token and onboarding is completed
+      final onboardingCompleted = !TokenStorage.needsOnboarding;
+      if (onboardingCompleted) {
+        _ref.read(authStateProvider.notifier).state = AuthState.authenticated;
+        state = AuthState.authenticated;
+      } else {
+        _ref.read(authStateProvider.notifier).state = AuthState.needsOnboarding;
+        state = AuthState.needsOnboarding;
+      }
     }
   }
 

@@ -523,3 +523,49 @@ export async function deleteReport(id: string): Promise<void> {
     mockReports.splice(index, 1);
   }
 }
+
+// 9. APP SETTINGS MANAGEMENT
+export interface AppSettingsRow {
+  id: string;
+  ai_provider: string;
+  gemini_model: string;
+  claude_model: string;
+  gemini_api_key: string | null;
+  claude_api_key: string | null;
+  updated_at: string;
+}
+
+export async function getAppSettings(): Promise<AppSettingsRow> {
+  const { data, error } = await supabaseAdmin
+    .from('app_settings')
+    .select('*')
+    .eq('id', 'active_settings')
+    .single();
+
+  if (error) {
+    // Return default settings structure if row doesn't exist
+    return {
+      id: 'active_settings',
+      ai_provider: 'gemini',
+      gemini_model: 'gemini-flash-latest',
+      claude_model: 'claude-3-5-sonnet-20241022',
+      gemini_api_key: null,
+      claude_api_key: null,
+      updated_at: new Date().toISOString()
+    };
+  }
+
+  return data;
+}
+
+export async function updateAppSettings(settings: Partial<Omit<AppSettingsRow, 'id' | 'updated_at'>>): Promise<void> {
+  const { error } = await supabaseAdmin
+    .from('app_settings')
+    .upsert({
+      id: 'active_settings',
+      ...settings,
+      updated_at: new Date().toISOString()
+    });
+
+  if (error) throw error;
+}
