@@ -5,7 +5,14 @@ from typing import AsyncGenerator
 
 # Create async database engine
 is_sqlite = settings.DATABASE_URL.startswith("sqlite")
-connect_args = {"check_same_thread": False} if is_sqlite else {}
+connect_args = (
+    {"check_same_thread": False}
+    if is_sqlite
+    else {
+        "prepared_statement_cache_size": 0,
+        "statement_cache_size": 0,
+    }
+)
 
 engine = create_async_engine(
     settings.DATABASE_URL,
