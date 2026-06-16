@@ -14,7 +14,7 @@ interface AppSettings {
 export default function SettingsPage() {
   const [settings, setSettings] = useState<AppSettings>({
     ai_provider: 'gemini',
-    gemini_model: 'gemini-flash-latest',
+    gemini_model: 'gemini-2.0-flash',
     claude_model: 'claude-3-5-sonnet-20241022',
     gemini_api_key: '',
     claude_api_key: '',
@@ -35,7 +35,7 @@ export default function SettingsPage() {
           const data = json.data;
           setSettings({
             ai_provider: data.ai_provider || 'gemini',
-            gemini_model: data.gemini_model || 'gemini-flash-latest',
+            gemini_model: data.gemini_model || 'gemini-2.0-flash',
             claude_model: data.claude_model || 'claude-3-5-sonnet-20241022',
             // Mask keys if they exist in the DB
             gemini_api_key: data.gemini_api_key ? '••••••••••••••••••••••••' : '',
@@ -223,10 +223,12 @@ export default function SettingsPage() {
                 onChange={(e) => setSettings({ ...settings, gemini_model: e.target.value })}
                 className="w-full rounded-lg border border-neutral-800 bg-neutral-950 p-2.5 text-sm text-white focus:border-blue-500 focus:outline-none"
               >
-                <option value="gemini-flash-latest">gemini-flash-latest (Recommended - 1.5/3.5)</option>
+                <option value="gemini-2.0-flash">gemini-2.0-flash (Recommended - Fast & stable)</option>
                 <option value="gemini-2.5-flash">gemini-2.5-flash (Thinking variant)</option>
-                <option value="gemini-2.0-flash">gemini-2.0-flash</option>
                 <option value="gemini-2.5-pro">gemini-2.5-pro (High intelligence)</option>
+                <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+                <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+                <option value="gemini-pro">gemini-pro (Legacy)</option>
               </select>
             </div>
 
@@ -256,6 +258,8 @@ export default function SettingsPage() {
                 <option value="claude-3-5-sonnet-20241022">claude-3-5-sonnet-latest (Default)</option>
                 <option value="claude-3-5-haiku-20241022">claude-3-5-haiku-latest</option>
                 <option value="claude-3-opus-20240229">claude-3-opus</option>
+                <option value="claude-opus-4-5">claude-opus-4.5</option>
+                <option value="claude-sonnet-4-5">claude-sonnet-4.5</option>
               </select>
             </div>
 

@@ -547,7 +547,7 @@ export async function getAppSettings(): Promise<AppSettingsRow> {
     return {
       id: 'active_settings',
       ai_provider: 'gemini',
-      gemini_model: 'gemini-flash-latest',
+      gemini_model: 'gemini-2.0-flash',
       claude_model: 'claude-3-5-sonnet-20241022',
       gemini_api_key: null,
       claude_api_key: null,
