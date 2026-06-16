@@ -32,22 +32,26 @@ class AuthNotifier extends StateNotifier<AuthState> {
     checkAuth();
     
     // Listen to Supabase auth state changes (e.g. after Google OAuth redirect)
-    sb.Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
-      final event = data.event;
-      final session = data.session;
-      debugPrint('Supabase Auth Change Event: $event, session present: ${session != null}');
-      
-      if (session != null && (event == sb.AuthChangeEvent.signedIn || event == sb.AuthChangeEvent.tokenRefreshed)) {
-        final token = session.accessToken;
-        debugPrint('Supabase Session detected! Exchanging with backend...');
-        try {
-          await _exchangeSupabaseToken(token);
-        } catch (e, stackTrace) {
-          debugPrint('Error exchanging Supabase token with backend: $e');
-          debugPrint('Stacktrace: $stackTrace');
+    try {
+      sb.Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
+        final event = data.event;
+        final session = data.session;
+        debugPrint('Supabase Auth Change Event: $event, session present: ${session != null}');
+        
+        if (session != null && (event == sb.AuthChangeEvent.signedIn || event == sb.AuthChangeEvent.tokenRefreshed)) {
+          final token = session.accessToken;
+          debugPrint('Supabase Session detected! Exchanging with backend...');
+          try {
+            await _exchangeSupabaseToken(token);
+          } catch (e, stackTrace) {
+            debugPrint('Error exchanging Supabase token with backend: $e');
+            debugPrint('Stacktrace: $stackTrace');
+          }
         }
-      }
-    });
+      });
+    } catch (e) {
+      debugPrint('Supabase is not initialized or listener setup failed (OAuth will be disabled): $e');
+    }
   }
 
   Future<void> checkAuth() async {
@@ -110,6 +114,59 @@ class AuthNotifier extends StateNotifier<AuthState> {
         _ref.read(authStateProvider.notifier).state = AuthState.needsOnboarding;
         state = AuthState.needsOnboarding;
       }
+    }
+  }
+
+  Future<void> sendOtp(String email, {String flow = 'login'}) async {
+    final response = await _apiService.post(
+      ApiConstants.sendOtp,
+      data: {
+        'email': email,
+        'flow': flow,
+      },
+    );
+    if (!response.success) {
+      throw ApiException(response.error ?? "Failed to send OTP.");
+    }
+  }
+
+  Future<void> verifyOtp(String email, String code, {String? name}) async {
+    try {
+      final response = await _apiService.post(
+        ApiConstants.verifyOtp,
+        data: {
+          'email': email,
+          'code': code,
+          if (name != null) 'name': name,
+        },
+      );
+
+      if (response.success && response.data != null) {
+        final rawData = response.data;
+        if (rawData is! Map) {
+          throw ApiException('Expected response data to be a Map');
+        }
+        final resData = Map<String, dynamic>.from(rawData);
+        final rawUser = resData['user'];
+        if (rawUser is! Map) {
+          throw ApiException('Expected user field to be a Map');
+        }
+        final userMap = Map<String, dynamic>.from(rawUser);
+        currentUser = User.fromJson(userMap);
+
+        await TokenStorage.saveTokens(
+          accessToken: resData['access_token']?.toString() ?? '',
+          refreshToken: resData['refresh_token']?.toString() ?? '',
+        );
+
+        // Check auth status (onboarding check etc)
+        await checkAuth();
+      } else {
+        throw ApiException(response.error ?? "Failed to verify OTP.");
+      }
+    } catch (e) {
+      await logout();
+      rethrow;
     }
   }
 

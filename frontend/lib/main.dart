@@ -13,20 +13,39 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    // Initialize AdMob SDK
-    await AdService.initialize();
+    // 1. Initialize Hive database & Token Storage (resiliently)
+    try {
+      await Hive.initFlutter();
+      await TokenStorage.init();
+    } catch (e) {
+      debugPrint('Hive/TokenStorage initialization failed, attempting recovery: $e');
+      try {
+        // Recovery: try deleting the Hive box files and re-initializing
+        await Hive.deleteBoxFromDisk(TokenStorage.boxName);
+        await Hive.initFlutter();
+        await TokenStorage.init();
+      } catch (recoveryError) {
+        debugPrint('Hive recovery failed: $recoveryError');
+        rethrow;
+      }
+    }
 
-    // Initialize Hive database
-    await Hive.initFlutter();
-    
-    // Initialize Hive token box
-    await TokenStorage.init();
+    // 2. Initialize AdMob SDK (non-blocking)
+    try {
+      await AdService.initialize();
+    } catch (e) {
+      debugPrint('AdService initialization failed: $e');
+    }
 
-    // Initialize Supabase
-    await Supabase.initialize(
-      url: 'https://pxcwkgrpkkoukgaqicky.supabase.co',
-      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4Y3drZ3Jwa2tvdWtnYXFpY2t5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MDMxNTMsImV4cCI6MjA5NTI3OTE1M30.jcQliptd6QNZ6B08KtwYmZl4EBwgysMRLZQb7A93J-0',
-    );
+    // 3. Initialize Supabase (non-blocking to prevent offline DNS failures from crashing startup)
+    try {
+      await Supabase.initialize(
+        url: 'https://pxcwkgrpkkoukgaqicky.supabase.co',
+        anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4Y3drZ3Jwa2tvdWtnYXFpY2t5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MDMxNTMsImV4cCI6MjA5NTI3OTE1M30.jcQliptd6QNZ6B08KtwYmZl4EBwgysMRLZQb7A93J-0',
+      );
+    } catch (e) {
+      debugPrint('Supabase initialization failed (app will run in offline mode): $e');
+    }
 
     runApp(
       const ProviderScope(
