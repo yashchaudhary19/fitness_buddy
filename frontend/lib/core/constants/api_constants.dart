@@ -1,5 +1,5 @@
 class ApiConstants {
-  static const String baseUrl = "https://nutrivault.techotd.in";
+  static const String baseUrl = "https://nutrivault-backend.onrender.com";
 
   // Auth paths
   static const String register = "/api/auth/register";
