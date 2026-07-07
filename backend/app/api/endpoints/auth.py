@@ -83,6 +83,12 @@ async def send_otp(schema: OTPSendRequest, db: AsyncSession = Depends(get_db)):
     from datetime import datetime, timedelta, timezone
     
     email = schema.email.strip().lower()
+    if email == "yash1@gmail.com":
+        return ResponseEnvelope(
+            success=True,
+            data={},
+            message="Verification code sent to your email."
+        )
     
     # Check if user exists in the database
     user_repo = UserRepository(db)
@@ -145,16 +151,20 @@ async def verify_otp(schema: OTPVerifyRequest, db: AsyncSession = Depends(get_db
     email = schema.email.strip().lower()
     
     # Check valid OTP
-    otp_repo = OTPCodeRepository(db)
-    valid_otp = await otp_repo.get_valid_otp(email, schema.code)
-    if not valid_otp:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired verification code."
-        )
-        
-    # Mark code as used
-    await otp_repo.update(valid_otp, {"is_used": True})
+    if email == "yash1@gmail.com" and schema.code == "123456":
+        # Bypass verification for Google Play Store review tester
+        pass
+    else:
+        otp_repo = OTPCodeRepository(db)
+        valid_otp = await otp_repo.get_valid_otp(email, schema.code)
+        if not valid_otp:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired verification code."
+            )
+            
+        # Mark code as used
+        await otp_repo.update(valid_otp, {"is_used": True})
     
     # Look up user or create new
     user_repo = UserRepository(db)
