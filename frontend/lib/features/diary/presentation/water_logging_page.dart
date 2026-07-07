@@ -102,38 +102,77 @@ class _WaterLoggingPageState extends ConsumerState<WaterLoggingPage> with Ticker
   }
 
   Future<void> _addWater(int amountMl) async {
-    if (_isSaving) return;
+    // 1. Optimistic Local Update
+    final tempId = DateTime.now().millisecondsSinceEpoch.toString();
+    final tempEntry = {
+      'id': tempId,
+      'amount_ml': amountMl,
+      'logged_at': DateTime.now().toUtc().toIso8601String(),
+      'is_temp': true,
+    };
 
+    final prevPercent = _currentPercent;
     setState(() {
-      _isSaving = true;
+      _waterConsumed += amountMl;
+      _waterEntries = [tempEntry, ..._waterEntries];
+      _currentPercent = (_waterConsumed / _waterGoal).clamp(0.0, 1.0);
+      
+      _levelAnimation = Tween<double>(begin: prevPercent, end: _currentPercent).animate(
+        CurvedAnimation(parent: _levelController, curve: Curves.easeOutCubic),
+      );
+      _levelController.forward(from: 0.0);
     });
 
     try {
       final notifier = ref.read(summaryProvider.notifier);
       await notifier.addWaterQuick(amountMl);
       await _fetchWaterEntries();
-    } catch (_) {}
-
-    setState(() {
-      _isSaving = false;
-    });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.error,
+            content: Text("Failed to record water: $e"),
+          ),
+        );
+        // Roll back and sync with server
+        await _fetchWaterEntries();
+      }
+    }
   }
 
   Future<void> _deleteWaterEntry(String id) async {
-    if (_isSaving) return;
+    // 1. Find the entry and amount
+    final entryIndex = _waterEntries.indexWhere((e) => e['id'] == id);
+    if (entryIndex == -1) return;
 
+    final entry = _waterEntries[entryIndex];
+    final amount = entry['amount_ml'] as int? ?? 0;
+
+    // 2. Optimistic Local Update
+    final prevPercent = _currentPercent;
     setState(() {
-      _isSaving = true;
+      _waterConsumed = (_waterConsumed - amount).clamp(0.0, double.infinity);
+      _waterEntries = List.from(_waterEntries)..removeAt(entryIndex);
+      _currentPercent = (_waterConsumed / _waterGoal).clamp(0.0, 1.0);
+
+      _levelAnimation = Tween<double>(begin: prevPercent, end: _currentPercent).animate(
+        CurvedAnimation(parent: _levelController, curve: Curves.easeOutCubic),
+      );
+      _levelController.forward(from: 0.0);
     });
 
     try {
       final apiService = ref.read(apiServiceProvider);
       final response = await apiService.delete("${ApiConstants.water}$id");
       if (response.success) {
-        // Refresh summary provider so the main dashboard is updated
-        await ref.read(summaryProvider.notifier).fetchSummary();
-        // Re-fetch local entries list and update total
-        await _fetchWaterEntries();
+        // Run both fetches in parallel to minimize latency
+        await Future.wait([
+          ref.read(summaryProvider.notifier).fetchSummary(),
+          _fetchWaterEntries(),
+        ]);
+      } else {
+        throw ApiException(response.error ?? "Failed to delete water log.");
       }
     } catch (e) {
       if (mounted) {
@@ -143,12 +182,11 @@ class _WaterLoggingPageState extends ConsumerState<WaterLoggingPage> with Ticker
             content: Text("Failed to delete water log: $e"),
           ),
         );
+        // Roll back and sync with server
+        await _fetchWaterEntries();
+        await ref.read(summaryProvider.notifier).fetchSummary();
       }
     }
-
-    setState(() {
-      _isSaving = false;
-    });
   }
 
   @override
@@ -339,8 +377,12 @@ class _WaterLoggingPageState extends ConsumerState<WaterLoggingPage> with Ticker
                             ],
                           ),
                           IconButton(
-                            icon: const Icon(LucideIcons.trash2, color: AppColors.error, size: 20),
-                            onPressed: _isSaving ? null : () => _deleteWaterEntry(entry['id'] as String),
+                            icon: Icon(
+                              LucideIcons.trash2, 
+                              color: entry['is_temp'] == true ? Colors.grey : AppColors.error, 
+                              size: 20
+                            ),
+                            onPressed: entry['is_temp'] == true ? null : () => _deleteWaterEntry(entry['id'] as String),
                           ),
                         ],
                       ),

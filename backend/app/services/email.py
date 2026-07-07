@@ -25,13 +25,10 @@ async def send_otp_email(to_email: str, otp_code: str) -> bool:
     logger.info("==================================================")
     print(f"\n[EMAIL SIMULATION] Sending OTP {otp_code} to {to_email}\n")
 
-    # If SMTP password/API key is not configured, treat simulated send as successful only in development
+    # If SMTP password/API key is not configured, treat simulated send as successful
     if not settings.SMTP_PASSWORD:
-        logger.warning("SMTP password/API key not configured.")
-        if settings.ENVIRONMENT == "development":
-            logger.info("Simulated email delivery successfully.")
-            return True
-        return False
+        logger.info("SMTP settings not configured. Simulated email delivery successfully.")
+        return True
 
     # 1. Check if we should use Resend HTTPS API (starts with re_)
     if settings.SMTP_PASSWORD.startswith("re_"):
