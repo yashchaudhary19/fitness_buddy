@@ -6,7 +6,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 
 import 'package:frontend/core/theme/app_theme.dart';
+import 'package:frontend/core/theme/theme_provider.dart';
 import 'package:frontend/features/profile/providers/profile_provider.dart';
+import 'package:frontend/shared/widgets/premium_error_view.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -84,8 +86,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       _initializeForm(state.goal!);
     }
 
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
       appBar: AppBar(
         title: Text(
           "My Goal Profile",
@@ -131,9 +134,26 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           _buildTargetsCard(state.goal!),
                           const SizedBox(height: 24),
 
+                          // App Preferences (Theme Selector)
+                          Text(
+                            "App Preferences",
+                            style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          const SizedBox(height: 12),
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surface,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: theme.dividerColor),
+                            ),
+                            child: _buildThemeModeRow(ref),
+                          ),
+                          const SizedBox(height: 24),
+
                           Text(
                             "Goal Parameters",
-                            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                            style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                           const SizedBox(height: 12),
 
@@ -141,87 +161,87 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           Container(
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              color: AppColors.darkSurface,
+                              color: theme.colorScheme.surface,
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: AppColors.darkBorder),
+                              border: Border.all(color: theme.dividerColor),
                             ),
                             child: Column(
                               children: [
                                 // Goal type dropdown
-                                _buildDropdownRow(
-                                  label: "Fitness Goal",
-                                  value: _goalType,
-                                  items: const [
-                                    DropdownMenuItem(value: 'lose', child: Text("Weight Loss")),
-                                    DropdownMenuItem(value: 'maintain', child: Text("Maintenance")),
-                                    DropdownMenuItem(value: 'gain', child: Text("Muscle Gain")),
-                                  ],
-                                  onChanged: (val) => setState(() => _goalType = val!),
-                                ),
-                                const Divider(color: AppColors.darkBorder, height: 24),
+                                  _buildDropdownRow(
+                                    label: "Fitness Goal",
+                                    value: _goalType,
+                                    items: const [
+                                      DropdownMenuItem(value: 'lose', child: Text("Weight Loss")),
+                                      DropdownMenuItem(value: 'maintain', child: Text("Maintenance")),
+                                      DropdownMenuItem(value: 'gain', child: Text("Muscle Gain")),
+                                    ],
+                                    onChanged: (val) => setState(() => _goalType = val!),
+                                  ),
+                                  Divider(color: theme.dividerColor, height: 24),
 
-                                // Gender dropdown
-                                _buildDropdownRow(
-                                  label: "Gender",
-                                  value: _gender,
-                                  items: const [
-                                    DropdownMenuItem(value: 'male', child: Text("Male")),
-                                    DropdownMenuItem(value: 'female', child: Text("Female")),
-                                    DropdownMenuItem(value: 'other', child: Text("Other")),
-                                  ],
-                                  onChanged: (val) => setState(() => _gender = val!),
-                                ),
-                                const Divider(color: AppColors.darkBorder, height: 24),
+                                  // Gender dropdown
+                                  _buildDropdownRow(
+                                    label: "Gender",
+                                    value: _gender,
+                                    items: const [
+                                      DropdownMenuItem(value: 'male', child: Text("Male")),
+                                      DropdownMenuItem(value: 'female', child: Text("Female")),
+                                      DropdownMenuItem(value: 'other', child: Text("Other")),
+                                    ],
+                                    onChanged: (val) => setState(() => _gender = val!),
+                                  ),
+                                  Divider(color: theme.dividerColor, height: 24),
 
-                                // Activity level dropdown
-                                _buildDropdownRow(
-                                  label: "Activity Level",
-                                  value: _activityLevel,
-                                  items: const [
-                                    DropdownMenuItem(value: 'sedentary', child: Text("Sedentary")),
-                                    DropdownMenuItem(value: 'light', child: Text("Lightly Active")),
-                                    DropdownMenuItem(value: 'moderate', child: Text("Moderately Active")),
-                                    DropdownMenuItem(value: 'active', child: Text("Very Active")),
-                                    DropdownMenuItem(value: 'very_active', child: Text("Extra Active")),
-                                  ],
-                                  onChanged: (val) => setState(() => _activityLevel = val!),
-                                ),
-                                const Divider(color: AppColors.darkBorder, height: 24),
+                                  // Activity level dropdown
+                                  _buildDropdownRow(
+                                    label: "Activity Level",
+                                    value: _activityLevel,
+                                    items: const [
+                                      DropdownMenuItem(value: 'sedentary', child: Text("Sedentary")),
+                                      DropdownMenuItem(value: 'light', child: Text("Lightly Active")),
+                                      DropdownMenuItem(value: 'moderate', child: Text("Moderately Active")),
+                                      DropdownMenuItem(value: 'active', child: Text("Very Active")),
+                                      DropdownMenuItem(value: 'very_active', child: Text("Extra Active")),
+                                    ],
+                                    onChanged: (val) => setState(() => _activityLevel = val!),
+                                  ),
+                                  Divider(color: theme.dividerColor, height: 24),
 
-                                // Numeric values
-                                _buildNumericFormRow(
-                                  label: "Current Weight (kg)",
-                                  initialValue: _currentWeight.toString(),
-                                  onChanged: (val) => _currentWeight = double.tryParse(val) ?? _currentWeight,
-                                ),
-                                const Divider(color: AppColors.darkBorder, height: 24),
+                                  // Numeric values
+                                  _buildNumericFormRow(
+                                    label: "Current Weight (kg)",
+                                    initialValue: _currentWeight.toString(),
+                                    onChanged: (val) => _currentWeight = double.tryParse(val) ?? _currentWeight,
+                                  ),
+                                  Divider(color: theme.dividerColor, height: 24),
 
-                                _buildNumericFormRow(
-                                  label: "Target Weight (kg)",
-                                  initialValue: _targetWeight.toString(),
-                                  onChanged: (val) => _targetWeight = double.tryParse(val) ?? _targetWeight,
-                                ),
-                                const Divider(color: AppColors.darkBorder, height: 24),
+                                  _buildNumericFormRow(
+                                    label: "Target Weight (kg)",
+                                    initialValue: _targetWeight.toString(),
+                                    onChanged: (val) => _targetWeight = double.tryParse(val) ?? _targetWeight,
+                                  ),
+                                  Divider(color: theme.dividerColor, height: 24),
 
-                                _buildNumericFormRow(
-                                  label: "Weight Pace (kg/wk)",
-                                  initialValue: _weeklyPace.toString(),
-                                  onChanged: (val) => _weeklyPace = double.tryParse(val) ?? _weeklyPace,
-                                ),
-                                const Divider(color: AppColors.darkBorder, height: 24),
+                                  _buildNumericFormRow(
+                                    label: "Weight Pace (kg/wk)",
+                                    initialValue: _weeklyPace.toString(),
+                                    onChanged: (val) => _weeklyPace = double.tryParse(val) ?? _weeklyPace,
+                                  ),
+                                  Divider(color: theme.dividerColor, height: 24),
 
-                                _buildNumericFormRow(
-                                  label: "Height (cm)",
-                                  initialValue: _height.toString(),
-                                  onChanged: (val) => _height = double.tryParse(val) ?? _height,
-                                ),
-                                const Divider(color: AppColors.darkBorder, height: 24),
+                                  _buildNumericFormRow(
+                                    label: "Height (cm)",
+                                    initialValue: _height.toString(),
+                                    onChanged: (val) => _height = double.tryParse(val) ?? _height,
+                                  ),
+                                  Divider(color: theme.dividerColor, height: 24),
 
-                                _buildNumericFormRow(
-                                  label: "Age (years)",
-                                  initialValue: _age.toString(),
-                                  onChanged: (val) => _age = int.tryParse(val) ?? _age,
-                                ),
+                                  _buildNumericFormRow(
+                                    label: "Age (years)",
+                                    initialValue: _age.toString(),
+                                    onChanged: (val) => _age = int.tryParse(val) ?? _age,
+                                  ),
                               ],
                             ),
                           ),
@@ -260,7 +280,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                           backgroundColor: AppColors.error,
                                           content: Text(
                                             "Could not launch Privacy Policy link.",
-                                            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
+                                            style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                       );
@@ -273,7 +293,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                         backgroundColor: AppColors.error,
                                         content: Text(
                                           "Error opening Privacy Policy.",
-                                          style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
+                                          style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
                                         ),
                                       ),
                                     );
@@ -281,8 +301,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                 }
                               },
                               style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.white70,
-                                side: const BorderSide(color: AppColors.darkBorder, width: 1.5),
+                                foregroundColor: theme.textTheme.bodyMedium?.color,
+                                side: BorderSide(color: theme.dividerColor, width: 1.5),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                               ),
                               icon: const Icon(LucideIcons.shield, size: 18),
@@ -337,7 +357,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             children: [
               Text(
                 "Your Active Targets",
-                style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const Icon(LucideIcons.sparkles, color: AppColors.primary, size: 18),
             ],
@@ -380,7 +400,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         Text(
           "$label ($unit)",
-          style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 12),
+          style: GoogleFonts.outfit(fontSize: 12),
         ),
       ],
     );
@@ -388,16 +408,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   Widget _buildTargetMacroReadout(String label, String value, Color color) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: 6),
         Text(
           "$label: ",
-          style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 13),
+          style: GoogleFonts.outfit(fontSize: 13),
         ),
         Text(
           value,
-          style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13),
         ),
       ],
     );
@@ -409,8 +430,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     required List<DropdownMenuItem<String>> items,
     required ValueChanged<String?> onChanged,
   }) {
-    // Safety: ensure value is actually in the items list to prevent crash
     final safeValue = items.any((item) => item.value == value) ? value : items.first.value;
+    final theme = Theme.of(context);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -418,7 +439,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         Expanded(
           child: Text(
             label,
-            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+            style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14),
           ),
         ),
         SizedBox(
@@ -428,9 +449,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               value: safeValue,
               items: items,
               onChanged: onChanged,
-              dropdownColor: AppColors.darkSurface,
+              dropdownColor: theme.colorScheme.surface,
               style: GoogleFonts.outfit(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 14),
-              iconEnabledColor: Colors.white,
+              iconEnabledColor: theme.textTheme.bodyLarge?.color,
             ),
           ),
         ),
@@ -449,7 +470,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         Expanded(
           child: Text(
             label,
-            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+            style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14),
           ),
         ),
         SizedBox(
@@ -457,7 +478,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           child: TextFormField(
             initialValue: initialValue,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontWeight: FontWeight.bold),
             textAlign: TextAlign.end,
             decoration: const InputDecoration(
               border: InputBorder.none,
@@ -470,28 +491,53 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildErrorView(String error, ProfileNotifier notifier) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(LucideIcons.alertTriangle, color: AppColors.error, size: 48),
-            const SizedBox(height: 16),
-            Text(
-              error,
-              style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 14),
-              textAlign: TextAlign.center,
+  Widget _buildThemeModeRow(WidgetRef ref) {
+    final themeMode = ref.watch(themeProvider);
+    final themeNotifier = ref.read(themeProvider.notifier);
+    final theme = Theme.of(context);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Text(
+            "Theme Mode",
+            style: GoogleFonts.outfit(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
             ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () => notifier.fetchGoalProfile(),
-              child: const Text("Retry"),
-            ),
-          ],
+          ),
         ),
-      ),
+        SizedBox(
+          width: 160,
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<ThemeMode>(
+              value: themeMode,
+              items: const [
+                DropdownMenuItem(value: ThemeMode.light, child: Text("Light Mode")),
+                DropdownMenuItem(value: ThemeMode.dark, child: Text("Dark Mode")),
+                DropdownMenuItem(value: ThemeMode.system, child: Text("System Default")),
+              ],
+              onChanged: (val) => themeNotifier.setThemeMode(val!),
+              dropdownColor: theme.colorScheme.surface,
+              style: GoogleFonts.outfit(
+                color: theme.primaryColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+              iconEnabledColor: theme.textTheme.bodyLarge?.color,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildErrorView(String error, ProfileNotifier notifier) {
+    return PremiumErrorView(
+      errorMessage: error,
+      onRetry: () => notifier.fetchGoalProfile(),
+      title: "Could not load goal profile",
     );
   }
 }

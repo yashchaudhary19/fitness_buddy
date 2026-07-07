@@ -19,6 +19,34 @@ from app.schemas.ai import ChatMessage
 
 logger = logging.getLogger("nutritrack.ai_service")
 
+# Registry of known-valid Gemini model identifiers.
+# Any model stored in DB or .env is validated against this set;
+# an unrecognised name is auto-corrected to the safe default.
+VALID_GEMINI_MODELS = {
+    "gemini-2.0-flash",
+    "gemini-2.5-flash",
+    "gemini-2.5-pro",
+    "gemini-1.5-flash",
+    "gemini-1.5-pro",
+    "gemini-pro",
+}
+# Safe default used when the configured model name is invalid.
+SAFE_DEFAULT_MODEL = "gemini-2.0-flash"
+
+# Ordered fallback chain for Gemini vision calls.
+# The configured model is prepended at runtime, so this list is only
+# consulted when the primary model fails.
+GEMINI_VISION_FALLBACKS = ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-flash"]
+
+# Claude models that support vision (image input).
+CLAUDE_VISION_MODELS = {
+    "claude-3-5-sonnet-20241022",
+    "claude-3-5-haiku-20241022",
+    "claude-3-opus-20240229",
+    "claude-opus-4-5",
+    "claude-sonnet-4-5",
+}
+
 class AIService:
     def __init__(self, db: AsyncSession):
         self.db = db
@@ -39,7 +67,14 @@ class AIService:
         self.provider = "gemini"
         raw_key = settings.GEMINI_API_KEY
         self.api_key = None if (raw_key == "your-gemini-api-key-here" or not raw_key) else raw_key
-        self.model = settings.GEMINI_MODEL
+        # Validate the configured model name and fall back to safe default if unknown
+        configured_model = settings.GEMINI_MODEL
+        self.model = configured_model if configured_model in VALID_GEMINI_MODELS else SAFE_DEFAULT_MODEL
+        if self.model != configured_model:
+            logger.warning(
+                f"Configured GEMINI_MODEL '{configured_model}' is not in VALID_GEMINI_MODELS. "
+                f"Auto-corrected to '{self.model}'."
+            )
 
         if self.db is None:
             return
@@ -58,7 +93,13 @@ class AIService:
                     self.model = db_settings.claude_model or "claude-3-5-sonnet-20241022"
                     self.api_key = db_settings.claude_api_key or os.getenv("CLAUDE_API_KEY") or None
                 else:
-                    self.model = db_settings.gemini_model or "gemini-flash-latest"
+                    # Validate DB-stored model name
+                    db_model = db_settings.gemini_model or SAFE_DEFAULT_MODEL
+                    self.model = db_model if db_model in VALID_GEMINI_MODELS else SAFE_DEFAULT_MODEL
+                    if self.model != db_model:
+                        logger.warning(
+                            f"DB gemini_model '{db_model}' is invalid. Auto-corrected to '{self.model}'."
+                        )
                     self.api_key = db_settings.gemini_api_key or raw_key or None
         except Exception as e:
             logger.error(f"Failed to load dynamic settings from database: {e}. Using .env config values.")
@@ -227,8 +268,8 @@ class AIService:
                                 header_part, base64_data = url_val.split(",", 1)
                                 mime_type = header_part.split(";")[0].split(":")[1]
                                 parts.append({
-                                    "inline_data": {
-                                        "mime_type": mime_type,
+                                    "inlineData": {
+                                        "mimeType": mime_type,
                                         "data": base64_data
                                     }
                                 })
@@ -264,15 +305,64 @@ class AIService:
         }
 
         async with httpx.AsyncClient(timeout=60.0) as client:
-            response = await client.post(url, headers=headers, json=payload)
+            response = None
+            last_error = None
+            
+            # Try up to 5 times with exponential backoff for transient errors
+            # (extra attempts to allow one fallback-model retry after switching)
+            for attempt in range(1, 6):
+                try:
+                    logger.info(f"Invoking Gemini model {selected_model} (Attempt {attempt})...")
+                    response = await client.post(url, headers=headers, json=payload)
+                    
+                    if response.status_code == 200:
+                        break  # Success!
+                    
+                    logger.warning(f"Gemini API returned status {response.status_code} for model {selected_model} on attempt {attempt}.")
+                    
+                    # If it's a rate limit (429) or transient server issue (5xx), wait and retry
+                    if response.status_code in (429, 500, 502, 503, 504):
+                        import asyncio
+                        # Switch to fallback model on first 5xx/429 if we haven't already
+                        if selected_model != "gemini-2.5-flash":
+                            logger.warning("Switching to fallback model gemini-2.5-flash due to server error...")
+                            selected_model = "gemini-2.5-flash"
+                            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+                        await asyncio.sleep(1.0 * min(attempt, 3))
+                        continue
+                    
+                    # If it's a 4xx error (other than 429) and we are not already using gemini-2.5-flash, fall back immediately
+                    if selected_model != "gemini-2.5-flash":
+                        logger.warning("Attempting immediate fallback to gemini-2.5-flash due to 4xx error...")
+                        selected_model = "gemini-2.5-flash"
+                        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+                        continue
+                    
+                    # Already on fallback model and still getting 4xx, stop retrying
+                    break
+                        
+                except Exception as e:
+                    logger.error(f"Gemini connection error on attempt {attempt}: {e}")
+                    last_error = str(e)
+                    import asyncio
+                    await asyncio.sleep(1.0 * min(attempt, 3))
+                    continue
+
+            # If response is still null after retries
+            if response is None:
+                raise HTTPException(
+                    status_code=502,
+                    detail=f"AI Service connection failed after multiple retries. Error: {last_error}"
+                )
+
             if response.status_code == 429:
-                logger.warning(f"Gemini API returned quota error (429): {response.text}")
+                logger.warning(f"Gemini API returned quota error (429) after retries: {response.text}")
                 raise HTTPException(
                     status_code=429,
                     detail="AI scan quota exceeded. Please try again in a few moments."
                 )
             elif response.status_code != 200:
-                logger.error(f"Gemini API returned error status {response.status_code}: {response.text}")
+                logger.error(f"Gemini API returned error status {response.status_code} after retries: {response.text}")
                 raise HTTPException(
                     status_code=502,
                     detail=f"AI Service communication error: {response.text}"
@@ -467,119 +557,438 @@ class AIService:
             
         return {"items": parsed_items, "unparsed_text": None}
 
+    def _repair_json(self, raw_text: str) -> Optional[Dict[str, Any]]:
+        """
+        Multi-strategy JSON repair:
+        1. Standard clean + parse
+        2. Regex-extract the items array and reconstruct a valid envelope
+        3. Return None if all strategies fail
+        """
+        import re
+
+        # Strategy 1: clean and parse normally
+        try:
+            cleaned = self._clean_json(raw_text)
+            return json.loads(cleaned)
+        except (json.JSONDecodeError, ValueError):
+            pass
+
+        # Strategy 2: extract items array directly in case the outer envelope is malformed
+        try:
+            items_match = re.search(r'"items"\s*:\s*(\[.*?\])', raw_text, re.DOTALL)
+            if items_match:
+                items_json = items_match.group(1)
+                # Remove trailing commas inside item objects
+                items_json = re.sub(r',\s*([\]}])', r'\1', items_json)
+                items = json.loads(items_json)
+                # Reconstruct minimal valid envelope
+                total_cal = sum(
+                    (item.get("calories_per_100g", 0) * item.get("estimated_grams", 0) / 100.0)
+                    for item in items
+                )
+                desc_match = re.search(r'"meal_description"\s*:\s*"([^"]+)"', raw_text)
+                return {
+                    "items": items,
+                    "total_estimated_calories": round(total_cal, 1),
+                    "overall_confidence": "medium",
+                    "meal_description": desc_match.group(1) if desc_match else "Meal detected from photo."
+                }
+        except (json.JSONDecodeError, ValueError):
+            pass
+
+        return None
+
+    async def _call_gemini_vision(
+        self,
+        image_bytes: bytes,
+        mime_type: str,
+        system_prompt: str,
+        user_text: str,
+        preferred_model: Optional[str] = None,
+    ) -> str:
+        """
+        Dedicated Gemini vision call.
+        Uses `preferred_model` (the dynamically configured model) as the first
+        attempt, then falls back through GEMINI_VISION_FALLBACKS if it fails.
+        This ensures the admin-panel model selection is always honoured.
+        """
+        if not self.api_key:
+            raise ValueError("GEMINI_API_KEY is not configured.")
+
+        base64_image = base64.b64encode(image_bytes).decode("utf-8")
+
+        payload = {
+            "systemInstruction": {
+                "parts": [{"text": system_prompt}]
+            },
+            "contents": [
+                {
+                    "role": "user",
+                    "parts": [
+                        {"text": user_text},
+                        {
+                            "inlineData": {
+                                "mimeType": mime_type,
+                                "data": base64_image
+                            }
+                        }
+                    ]
+                }
+            ],
+            "generationConfig": {
+                "responseMimeType": "application/json",
+                "maxOutputTokens": 4096,
+                "temperature": 0.2,
+            }
+        }
+
+        headers = {
+            "Content-Type": "application/json",
+            "x-goog-api-key": self.api_key
+        }
+
+        # Build fallback chain: configured model first, then known-good fallbacks
+        # (deduplicated while preserving order)
+        chain: List[str] = []
+        if preferred_model and preferred_model in VALID_GEMINI_MODELS:
+            chain.append(preferred_model)
+        for m in GEMINI_VISION_FALLBACKS:
+            if m not in chain:
+                chain.append(m)
+
+        import asyncio
+        last_error = None
+
+        async with httpx.AsyncClient(timeout=90.0) as client:
+            for model_name in chain:
+                current_url = (
+                    f"https://generativelanguage.googleapis.com/v1beta/"
+                    f"models/{model_name}:generateContent"
+                )
+                for retry in range(1, 4):
+                    try:
+                        logger.info(
+                            f"Gemini vision scan: model={model_name}, retry={retry}"
+                        )
+                        response = await client.post(
+                            current_url, headers=headers, json=payload
+                        )
+
+                        if response.status_code == 200:
+                            res_json = response.json()
+                            if "error" in res_json:
+                                err_msg = res_json["error"].get(
+                                    "message", str(res_json["error"])
+                                )
+                                logger.error(
+                                    f"Gemini vision body error on {model_name}: {err_msg}"
+                                )
+                                last_error = err_msg
+                                break  # try next model
+                            candidates = res_json.get("candidates", [])
+                            if not candidates:
+                                logger.warning(
+                                    f"Gemini vision no candidates on {model_name}."
+                                )
+                                last_error = "No candidates in response"
+                                break
+                            parts = (
+                                candidates[0].get("content", {}).get("parts", [])
+                            )
+                            if not parts:
+                                last_error = "No parts in candidate"
+                                break
+                            logger.info(
+                                f"Gemini vision success: model={model_name}"
+                            )
+                            return parts[0].get("text", "")
+
+                        logger.warning(
+                            f"Gemini vision model={model_name} HTTP "
+                            f"{response.status_code} (retry {retry})"
+                        )
+
+                        if response.status_code in (429, 500, 502, 503, 504):
+                            await asyncio.sleep(1.5 * retry)
+                            continue  # retry same model
+
+                        # Hard 4xx error — skip straight to next model
+                        last_error = f"HTTP {response.status_code}: {response.text[:200]}"
+                        break
+
+                    except httpx.RequestError as e:
+                        logger.error(
+                            f"Gemini vision network error on {model_name} retry {retry}: {e}"
+                        )
+                        last_error = str(e)
+                        await asyncio.sleep(1.5 * retry)
+                        continue
+
+        raise HTTPException(
+            status_code=502,
+            detail=f"All Gemini vision models exhausted. Last error: {last_error}"
+        )
+
+    async def _call_claude_vision(
+        self,
+        image_bytes: bytes,
+        mime_type: str,
+        system_prompt: str,
+        user_text: str,
+    ) -> str:
+        """
+        Claude vision call using the Anthropic Messages API.
+        Sends the image as a base64-encoded source block.
+        Falls back to claude-3-5-sonnet if the configured model doesn't support vision.
+        """
+        if not self.api_key:
+            raise ValueError("CLAUDE_API_KEY is not configured.")
+
+        # Ensure the configured model supports vision; fall back if not
+        model = self.model
+        if model not in CLAUDE_VISION_MODELS:
+            model = "claude-3-5-sonnet-20241022"
+            logger.warning(
+                f"Configured Claude model '{self.model}' may not support vision. "
+                f"Using '{model}' for scan."
+            )
+
+        base64_image = base64.b64encode(image_bytes).decode("utf-8")
+
+        payload = {
+            "model": model,
+            "max_tokens": 4096,
+            "system": system_prompt,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": mime_type,
+                                "data": base64_image,
+                            },
+                        },
+                        {"type": "text", "text": user_text},
+                    ],
+                }
+            ],
+        }
+
+        headers = {
+            "x-api-key": self.api_key,
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json",
+        }
+
+        import asyncio
+
+        async with httpx.AsyncClient(timeout=90.0) as client:
+            for retry in range(1, 4):
+                try:
+                    logger.info(
+                        f"Claude vision scan: model={model}, retry={retry}"
+                    )
+                    response = await client.post(
+                        "https://api.anthropic.com/v1/messages",
+                        headers=headers,
+                        json=payload,
+                    )
+
+                    if response.status_code == 200:
+                        res_json = response.json()
+                        content = res_json.get("content", [])
+                        if content and content[0].get("type") == "text":
+                            logger.info(f"Claude vision success: model={model}")
+                            return content[0]["text"]
+                        last_error = "Empty content in Claude response"
+                        break
+
+                    logger.warning(
+                        f"Claude vision HTTP {response.status_code} (retry {retry})"
+                    )
+
+                    if response.status_code in (429, 500, 502, 503, 504):
+                        await asyncio.sleep(1.5 * retry)
+                        continue
+
+                    raise HTTPException(
+                        status_code=502,
+                        detail=f"Claude vision error {response.status_code}: {response.text[:300]}",
+                    )
+
+                except httpx.RequestError as e:
+                    logger.error(
+                        f"Claude vision network error retry {retry}: {e}"
+                    )
+                    await asyncio.sleep(1.5 * retry)
+                    continue
+
+        raise HTTPException(
+            status_code=502,
+            detail="Claude vision failed after retries."
+        )
+
     async def scan_meal_photo(self, file_bytes: bytes, mime_type: str = "image/jpeg") -> Dict[str, Any]:
         """
-        Analyze a food/meal photo to estimate items, grams, and nutrient densities.
-        Fallback to simulated mock scanning if API key is not configured.
+        Analyze a food/meal photo using the active AI provider (Gemini or Claude).
+        The provider and model are read dynamically from the database (admin panel)
+        on every request, so changes take effect immediately without a restart.
+        Falls back to sensible mock data on any failure so the app never crashes.
         """
         fallback_response = {
             "items": [
                 {
-                    "name": "Grilled Salmon",
+                    "name": "Grilled Chicken Breast",
                     "estimated_grams": 150.0,
-                    "calories_per_100g": 208.0,
+                    "calories_per_100g": 165.0,
                     "carbs_per_100g": 0.0,
-                    "protein_per_100g": 20.0,
-                    "fat_per_100g": 13.0,
-                    "confidence": "high"
+                    "protein_per_100g": 31.0,
+                    "fat_per_100g": 3.6,
+                    "fiber_per_100g": 0.0,
+                    "confidence": "medium"
                 },
                 {
-                    "name": "Steamed Broccoli",
+                    "name": "Steamed White Rice",
+                    "estimated_grams": 180.0,
+                    "calories_per_100g": 130.0,
+                    "carbs_per_100g": 28.0,
+                    "protein_per_100g": 2.7,
+                    "fat_per_100g": 0.3,
+                    "fiber_per_100g": 0.4,
+                    "confidence": "medium"
+                },
+                {
+                    "name": "Mixed Vegetables",
                     "estimated_grams": 100.0,
-                    "calories_per_100g": 34.0,
-                    "carbs_per_100g": 7.0,
-                    "protein_per_100g": 2.8,
+                    "calories_per_100g": 65.0,
+                    "carbs_per_100g": 13.0,
+                    "protein_per_100g": 2.5,
                     "fat_per_100g": 0.4,
-                    "confidence": "high"
-                },
-                {
-                    "name": "Brown Rice",
-                    "estimated_grams": 120.0,
-                    "calories_per_100g": 111.0,
-                    "carbs_per_100g": 23.0,
-                    "protein_per_100g": 2.6,
-                    "fat_per_100g": 0.9,
+                    "fiber_per_100g": 3.5,
                     "confidence": "medium"
                 }
             ],
-            "total_estimated_calories": 479.2,
-            "overall_confidence": "high",
-            "meal_description": "Grilled salmon fillet with brown rice and a side of steamed broccoli."
+            "total_estimated_calories": 527.5,
+            "overall_confidence": "medium",
+            "meal_description": "Estimated meal — AI unavailable. Edit weights before logging.",
+            "scan_source": "fallback"
         }
 
+        # ── 1. Load dynamic provider + model from DB (validates model name too) ──
+        await self._load_settings()
+        logger.info(
+            f"Meal scan: provider={self.provider}, model={self.model}, "
+            f"api_key={'set' if self.api_key else 'missing'}"
+        )
+
         if not self.api_key:
-            logger.warning("GEMINI_API_KEY is missing. Simulating meal scan response.")
-            # Return high-quality mock response
+            logger.warning(
+                f"API key missing for provider '{self.provider}'. "
+                "Returning fallback scan response."
+            )
             return fallback_response
 
-        # Encode image to base64
-        base64_image = base64.b64encode(file_bytes).decode("utf-8")
-        image_data_url = f"data:{mime_type};base64,{base64_image}"
-
+        # ── 2. Shared prompt (identical regardless of provider) ──────────────
         system_prompt = (
-            "You are a professional nutrition expert. Analyze the user's meal photo and estimate what foods are present, "
-            "their estimated weight in grams, and their nutritional values per 100g. "
-            "Output ONLY valid JSON matching this schema: "
+            "You are a registered dietitian and computer vision expert specializing in nutritional analysis of food photos. "
+            "Your task is to carefully analyze a meal photo and identify every distinct food item visible on the plate or tray. "
+            "For each identified item:\n"
+            "  1. Name it precisely (e.g., 'Basmati Rice' not just 'Rice', 'Grilled Salmon Fillet' not just 'Fish').\n"
+            "  2. Estimate the weight in grams using visual cues: plate size, item thickness, density, and volume.\n"
+            "  3. Provide accurate USDA-grade nutritional values per 100g for the item in its cooked/prepared state.\n"
+            "  4. Set confidence based on visual clarity: 'high' if clearly identifiable, 'medium' if probable, 'low' if a guess.\n"
+            "\n"
+            "Portion estimation rules:\n"
+            "  - A standard dinner plate is ~26cm diameter; use it to scale portions.\n"
+            "  - Cooked rice: 1 cup \u2248 195g. Cooked pasta: 1 cup \u2248 140g.\n"
+            "  - Chicken breast (1 medium) \u2248 174g raw / 150g cooked.\n"
+            "  - A slice of bread \u2248 30g. One egg \u2248 50g.\n"
+            "\n"
+            "Output ONLY a valid JSON object \u2014 no markdown, no prose \u2014 matching this exact schema:\n"
             "{\n"
             "  \"items\": [\n"
             "    {\n"
-            "      \"name\": \"Food name\",\n"
-            "      \"estimated_grams\": 150.0,\n"
-            "      \"calories_per_100g\": 120.0,\n"
-            "      \"carbs_per_100g\": 15.0,\n"
-            "      \"protein_per_100g\": 5.0,\n"
-            "      \"fat_per_100g\": 2.0,\n"
-            "      \"confidence\": \"high|medium|low\"\n"
+            "      \"name\": \"Basmati Rice\",\n"
+            "      \"estimated_grams\": 195.0,\n"
+            "      \"calories_per_100g\": 130.0,\n"
+            "      \"carbs_per_100g\": 28.2,\n"
+            "      \"protein_per_100g\": 2.7,\n"
+            "      \"fat_per_100g\": 0.3,\n"
+            "      \"fiber_per_100g\": 0.4,\n"
+            "      \"confidence\": \"high\"\n"
             "    }\n"
             "  ],\n"
-            "  \"total_estimated_calories\": 350.0,\n"
-            "  \"overall_confidence\": \"high|medium|low\",\n"
-            "  \"meal_description\": \"Brief description of the plate\"\n"
+            "  \"total_estimated_calories\": 254.0,\n"
+            "  \"overall_confidence\": \"high\",\n"
+            "  \"meal_description\": \"A serving of fluffy basmati rice with a mixed vegetable curry.\"\n"
             "}"
         )
 
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": "Analyze this meal photo, detect the foods, estimate portion weights, and calculate macronutrients per 100g."
-                    },
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": image_data_url
-                        }
-                    }
-                ]
-            }
-        ]
+        user_text = (
+            "Please analyse this meal photo. Identify all food items, estimate their gram "
+            "weights from visual cues, and return accurate USDA-grade macronutrient and "
+            "micronutrient values per 100g for each item. "
+            "Be precise with portion sizes and specific with food names."
+        )
 
         try:
-            raw_res = await self._call_llm(
-                messages,
-                response_format={"type": "json_object"}
-            )
-            cleaned = self._clean_json(raw_res)
-            try:
-                return json.loads(cleaned)
-            except json.JSONDecodeError as jde:
-                logger.error(f"Meal scan JSON decode failed. Error: {jde}. Cleaned content: {cleaned}. Raw content: {raw_res}")
-                raise HTTPException(
-                    status_code=502,
-                    detail=f"AI returned invalid JSON: {str(jde)}"
+            # ── 3. Route to the correct provider vision call ─────────────────
+            if self.provider == "claude":
+                logger.info(f"Routing meal scan to Claude vision (model={self.model})")
+                raw_res = await self._call_claude_vision(
+                    image_bytes=file_bytes,
+                    mime_type=mime_type,
+                    system_prompt=system_prompt,
+                    user_text=user_text,
                 )
+            else:
+                # Gemini (default) — use configured model as first attempt
+                logger.info(f"Routing meal scan to Gemini vision (model={self.model})")
+                raw_res = await self._call_gemini_vision(
+                    image_bytes=file_bytes,
+                    mime_type=mime_type,
+                    system_prompt=system_prompt,
+                    user_text=user_text,
+                    preferred_model=self.model,
+                )
+
+            result = self._repair_json(raw_res)
+            if result is None:
+                logger.error(f"All JSON repair strategies failed. Raw: {raw_res[:500]}")
+                logger.warning("Falling back to default meal scan response.")
+                return fallback_response
+
+            # Ensure required fields exist with defaults
+            result.setdefault("total_estimated_calories", sum(
+                (item.get("calories_per_100g", 0) * item.get("estimated_grams", 0) / 100.0)
+                for item in result.get("items", [])
+            ))
+            result.setdefault("overall_confidence", "medium")
+            result.setdefault("meal_description", "Meal analysed from photo.")
+            result["scan_source"] = "ai"
+
+            # Ensure optional micronutrient fields default to 0 on each item
+            for item in result.get("items", []):
+                item.setdefault("fiber_per_100g", 0.0)
+
+            logger.info(
+                f"Meal scan succeeded: {len(result.get('items', []))} items detected, "
+                f"total_cal={result.get('total_estimated_calories', 0):.0f}"
+            )
+            return result
+
         except HTTPException as e:
-            logger.error(f"Meal scan AI HTTP error: {e.detail}")
-            raise
+            logger.error(f"Meal scan HTTP error: {e.detail}. Falling back to default response.")
+            return fallback_response
         except httpx.RequestError as e:
-            logger.error(f"Meal scan AI connection failed: {e}")
-            raise
+            logger.error(f"Meal scan network error: {e}. Falling back to default response.")
+            return fallback_response
         except Exception as e:
-            logger.error(f"Meal scan AI call failed: {e}")
-            raise
+            logger.error(f"Meal scan unexpected error: {e}. Falling back to default response.")
+            return fallback_response
 
     async def generate_insights(self, user_id: uuid.UUID) -> Dict[str, Any]:
         """

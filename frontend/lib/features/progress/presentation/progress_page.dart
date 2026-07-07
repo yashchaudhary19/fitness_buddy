@@ -42,11 +42,11 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: AppColors.darkSurface,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           title: Text(
             "Log Weight",
-            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
+            style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -54,7 +54,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
               TextFormField(
                 controller: _weightInputController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                 decoration: const InputDecoration(
                   labelText: "Current Weight (kg)",
                   hintText: "E.g. 74.5",
@@ -63,7 +63,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
               const SizedBox(height: 16),
               TextFormField(
                 controller: _noteInputController,
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                 decoration: const InputDecoration(
                   labelText: "Optional Note",
                   hintText: "Morning weight, after workout...",
@@ -74,7 +74,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text("Cancel", style: GoogleFonts.outfit(color: AppColors.darkTextSecondary)),
+              child: Text("Cancel", style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70)),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -114,7 +114,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
     final notifier = ref.read(progressProvider.notifier);
 
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           "Progress & Analytics",
@@ -123,7 +123,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
         bottom: TabBar(
           controller: _tabController,
           labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.darkTextSecondary,
+          unselectedLabelColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70,
           indicatorColor: AppColors.primary,
           labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold),
           tabs: const [
@@ -140,7 +140,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
             : TabBarView(
                 controller: _tabController,
                 children: [
-                  _buildWeightTab(context, state, notifier),
+                  _buildWeightTab(state, notifier),
                   _buildEnergyTab(state),
                   _buildMacrosTab(state),
                   _buildStreaksTab(state),
@@ -152,7 +152,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
 
   // --- WEIGHT TAB ---
 
-  Widget _buildWeightTab(BuildContext context, ProgressState state, ProgressNotifier notifier) {
+  Widget _buildWeightTab(ProgressState state, ProgressNotifier notifier) {
     final hasWeight = state.weightTimeline.isNotEmpty;
     final List<double> weightPoints = state.weightTimeline.map((w) => w.weightKg).toList();
     final double currentWeight = hasWeight ? state.weightTimeline.last.weightKg : 0.0;
@@ -175,11 +175,11 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
                   children: [
                     Text(
                       "Current Weight",
-                      style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 14),
+                      style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 14),
                     ),
                     Text(
                       hasWeight ? "$currentWeight kg" : "-- kg",
-                      style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 32),
+                      style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 32),
                     ),
                   ],
                 ),
@@ -198,9 +198,9 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.darkSurface,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppColors.darkBorder),
+                border: Border.all(color: Theme.of(context).dividerColor),
               ),
               child: hasWeight && weightPoints.length > 1
                   ? CustomPaint(
@@ -213,7 +213,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
                   : Center(
                       child: Text(
                         "Not enough weight data to draw chart",
-                        style: GoogleFonts.outfit(color: AppColors.darkTextSecondary),
+                        style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70),
                       ),
                     ),
             ),
@@ -225,7 +225,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
               children: [
                 Text(
                   "Timeline History",
-                  style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                  style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 Row(
                   children: [
@@ -243,7 +243,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
               Center(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 40),
-                  child: Text("No weight logs recorded yet.", style: GoogleFonts.outfit(color: AppColors.darkTextSecondary)),
+                  child: Text("No weight logs recorded yet.", style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70)),
                 ),
               )
             else
@@ -251,7 +251,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: state.weightTimeline.length,
-                separatorBuilder: (context, index) => const Divider(color: AppColors.darkBorder, height: 1),
+                separatorBuilder: (context, index) => Divider(color: Theme.of(context).dividerColor, height: 1),
                 itemBuilder: (context, index) {
                   // Display newest logs first
                   final entry = state.weightTimeline[state.weightTimeline.length - 1 - index];
@@ -265,11 +265,11 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
                           children: [
                             Text(
                               DateFormat('MMM d, yyyy').format(entry.date),
-                              style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
+                              style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
                             ),
                             Text(
                               "Moving Avg: ${entry.movingAverage7d.toStringAsFixed(1)} kg",
-                              style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 12),
+                              style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 12),
                             ),
                           ],
                         ),
@@ -295,9 +295,9 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
       label: Text("$days Days", style: GoogleFonts.outfit(fontSize: 12)),
       onSelected: (_) => notifier.fetchProgressData(periodDays: days),
       selectedColor: AppColors.primary,
-      backgroundColor: AppColors.darkSurface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       labelStyle: TextStyle(
-        color: isSelected ? Colors.black : Colors.white,
+        color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
         fontWeight: FontWeight.bold,
       ),
     );
@@ -316,12 +316,12 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
         children: [
           Text(
             "Calorie Intake Trends",
-            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+            style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 18),
           ),
           const SizedBox(height: 6),
           Text(
             "Track daily caloric budget against your set targets.",
-            style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 13),
+            style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 13),
           ),
           const SizedBox(height: 24),
 
@@ -331,9 +331,9 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.darkSurface,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: AppColors.darkBorder),
+              border: Border.all(color: Theme.of(context).dividerColor),
             ),
             child: hasData && consumedPoints.length > 1
                 ? CustomPaint(
@@ -346,7 +346,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
                 : Center(
                     child: Text(
                       "Not enough calorie data to draw chart",
-                      style: GoogleFonts.outfit(color: AppColors.darkTextSecondary),
+                      style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70),
                     ),
                   ),
           ),
@@ -355,7 +355,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
           // Average Calories readouts
           Text(
             "Daily Highlights",
-            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+            style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16),
           ),
           const SizedBox(height: 12),
 
@@ -366,7 +366,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
                 : "-- kcal",
             AppColors.secondary,
           ),
-          const Divider(color: AppColors.darkBorder),
+          Divider(color: Theme.of(context).dividerColor),
           _buildHighlightRow(
             "Average Burned",
             hasData
@@ -392,12 +392,12 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
         children: [
           Text(
             "Macronutrient Balances",
-            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+            style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 18),
           ),
           const SizedBox(height: 6),
           Text(
             "Monitor carbohydrate portions logged daily.",
-            style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 13),
+            style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 13),
           ),
           const SizedBox(height: 24),
 
@@ -407,9 +407,9 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.darkSurface,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: AppColors.darkBorder),
+              border: Border.all(color: Theme.of(context).dividerColor),
             ),
             child: hasData && carbsPoints.length > 1
                 ? CustomPaint(
@@ -422,7 +422,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
                 : Center(
                     child: Text(
                       "Not enough macronutrient data",
-                      style: GoogleFonts.outfit(color: AppColors.darkTextSecondary),
+                      style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70),
                     ),
                   ),
           ),
@@ -431,7 +431,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
           // Average protein / carbs / fats distribution
           Text(
             "Average Intake Breakdown",
-            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+            style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16),
           ),
           const SizedBox(height: 16),
 
@@ -449,15 +449,15 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.darkSurface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.darkBorder),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: Row(
         children: [
           Container(width: 12, height: 12, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
           const SizedBox(width: 12),
-          Text(label, style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
+          Text(label, style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold)),
           const Spacer(),
           const Icon(LucideIcons.checkCircle2, color: AppColors.primary, size: 18),
         ],
@@ -479,19 +479,19 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
           Icon(
             LucideIcons.flame,
             size: 100,
-            color: streak != null && streak.currentStreak > 0 ? AppColors.accent : AppColors.darkBorder,
+            color: streak != null && streak.currentStreak > 0 ? AppColors.accent : Theme.of(context).dividerColor,
           ),
           const SizedBox(height: 24),
           
           Text(
             streak != null ? "${streak.currentStreak} Day Streak!" : "0 Day Streak!",
-            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 36),
+            style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 36),
           ),
           const SizedBox(height: 8),
           
           Text(
             "Consistency is key. Log foods daily to maintain your logging streak.",
-            style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 14),
+            style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 14),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 48),
@@ -525,9 +525,9 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.darkSurface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.darkBorder),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: Column(
         children: [
@@ -535,12 +535,12 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
           const SizedBox(height: 12),
           Text(
             value,
-            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
+            style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 20),
           ),
           const SizedBox(height: 4),
           Text(
             label,
-            style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 12),
+            style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 12),
           ),
         ],
       ),
@@ -553,7 +553,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> with SingleTickerPr
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: GoogleFonts.outfit(color: Colors.white, fontSize: 15)),
+          Text(label, style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           Text(
             value,
             style: GoogleFonts.outfit(color: color, fontWeight: FontWeight.bold, fontSize: 16),

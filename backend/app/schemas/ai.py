@@ -9,6 +9,7 @@ class MealScanItem(BaseModel):
     carbs_per_100g: float
     protein_per_100g: float
     fat_per_100g: float
+    fiber_per_100g: Optional[float] = 0.0
     confidence: str = Field(..., description="high | medium | low")
 
 class MealScanResponse(BaseModel):
@@ -17,6 +18,7 @@ class MealScanResponse(BaseModel):
     overall_confidence: str = Field(..., description="high | medium | low")
     meal_description: str
     image_url: Optional[str] = None
+    scan_source: str = Field(default="ai", description="ai | fallback — indicates if real AI or mock data was used")
 
 # Voice Logging Schemas
 class VoiceParseRequest(BaseModel):
@@ -73,4 +75,3 @@ class DailyDebriefResponse(BaseModel):
 class WeightInterpretationResponse(BaseModel):
     interpretation: str
     suggestion: str
-

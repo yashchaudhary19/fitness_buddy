@@ -9,6 +9,8 @@ from app.schemas.user import (
     AuthResponse,
     TokenRefreshRequest,
     TokenRefreshResponse,
+    OTPSendRequest,
+    OTPVerifyRequest,
 )
 from app.schemas.goal import UserGoalCreate, UserGoalUpdate, UserGoalResponse
 from app.schemas.food import (
@@ -63,6 +65,8 @@ __all__ = [
     "AuthResponse",
     "TokenRefreshRequest",
     "TokenRefreshResponse",
+    "OTPSendRequest",
+    "OTPVerifyRequest",
     "UserGoalCreate",
     "UserGoalUpdate",
     "UserGoalResponse",

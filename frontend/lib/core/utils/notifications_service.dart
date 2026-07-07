@@ -27,7 +27,7 @@ class NotificationsService {
         duration: const Duration(seconds: 4),
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
-        backgroundColor: AppColors.darkSurface,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: AppColors.primary, width: 1),
@@ -43,11 +43,11 @@ class NotificationsService {
                 children: [
                   Text(
                     "NutriVault Reminder",
-                    style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                    style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 13),
                   ),
                   Text(
                     "Time to log your lunch and drink a glass of water!",
-                    style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 12),
+                    style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 12),
                   ),
                 ],
               ),

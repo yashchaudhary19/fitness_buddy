@@ -4,6 +4,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:frontend/core/theme/app_theme.dart';
+import 'package:frontend/core/theme/settings_storage.dart';
+import 'package:frontend/core/theme/theme_provider.dart';
 import 'package:frontend/core/router/router.dart';
 import 'package:frontend/core/network/token_storage.dart';
 import 'package:frontend/core/ads/ad_service.dart';
@@ -17,13 +19,16 @@ void main() async {
     try {
       await Hive.initFlutter();
       await TokenStorage.init();
+      await SettingsStorage.init();
     } catch (e) {
-      debugPrint('Hive/TokenStorage initialization failed, attempting recovery: $e');
+      debugPrint('Hive/TokenStorage/SettingsStorage initialization failed, attempting recovery: $e');
       try {
         // Recovery: try deleting the Hive box files and re-initializing
         await Hive.deleteBoxFromDisk(TokenStorage.boxName);
+        await Hive.deleteBoxFromDisk(SettingsStorage.boxName);
         await Hive.initFlutter();
         await TokenStorage.init();
+        await SettingsStorage.init();
       } catch (recoveryError) {
         debugPrint('Hive recovery failed: $recoveryError');
         rethrow;
@@ -94,6 +99,7 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final themeMode = ref.watch(themeProvider);
 
     return MaterialApp.router(
       title: 'NutriTrack',
@@ -102,7 +108,7 @@ class MyApp extends ConsumerWidget {
       // Theme settings
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.dark, // Default to deep black obsidian theme
+      themeMode: themeMode,
 
       // Router settings
       routerConfig: router,

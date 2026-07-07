@@ -4,8 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:intl/intl.dart';
 
 import 'package:frontend/core/theme/app_theme.dart';
+import 'package:frontend/core/network/api_service.dart';
+import 'package:frontend/core/constants/api_constants.dart';
 import 'package:frontend/features/dashboard/providers/summary_provider.dart';
 
 class WaterLoggingPage extends ConsumerStatefulWidget {
@@ -21,10 +24,10 @@ class _WaterLoggingPageState extends ConsumerState<WaterLoggingPage> with Ticker
   late Animation<double> _levelAnimation;
 
   double _currentPercent = 0.0;
-  double _targetPercent = 0.0;
   double _waterConsumed = 0.0;
   double _waterGoal = 2000.0;
   bool _isSaving = false;
+  List<dynamic> _waterEntries = [];
 
   @override
   void initState() {
@@ -54,7 +57,6 @@ class _WaterLoggingPageState extends ConsumerState<WaterLoggingPage> with Ticker
           _waterConsumed = summary.waterConsumedMl;
           _waterGoal = summary.waterGoalMl;
           _currentPercent = (_waterConsumed / _waterGoal).clamp(0.0, 1.0);
-          _targetPercent = _currentPercent;
           
           _levelAnimation = Tween<double>(begin: 0.0, end: _currentPercent).animate(
             CurvedAnimation(parent: _levelController, curve: Curves.easeOutCubic),
@@ -62,6 +64,7 @@ class _WaterLoggingPageState extends ConsumerState<WaterLoggingPage> with Ticker
           _levelController.forward();
         });
       }
+      _fetchWaterEntries();
     });
   }
 
@@ -72,6 +75,32 @@ class _WaterLoggingPageState extends ConsumerState<WaterLoggingPage> with Ticker
     super.dispose();
   }
 
+  Future<void> _fetchWaterEntries() async {
+    try {
+      final apiService = ref.read(apiServiceProvider);
+      final response = await apiService.get(
+        ApiConstants.water,
+        queryParameters: {'log_date': DateFormat('yyyy-MM-dd').format(ref.read(summaryProvider).selectedDate)},
+      );
+      if (response.success && response.data != null) {
+        final data = response.data as Map<String, dynamic>;
+        setState(() {
+          _waterEntries = data['entries'] as List? ?? [];
+          _waterConsumed = (data['daily_total_ml'] as num? ?? 0.0).toDouble();
+          _waterGoal = (data['goal_ml'] as num? ?? 2000.0).toDouble();
+          
+          final prevPercent = _currentPercent;
+          _currentPercent = (_waterConsumed / _waterGoal).clamp(0.0, 1.0);
+          
+          _levelAnimation = Tween<double>(begin: prevPercent, end: _currentPercent).animate(
+            CurvedAnimation(parent: _levelController, curve: Curves.easeOutCubic),
+          );
+          _levelController.forward(from: 0.0);
+        });
+      }
+    } catch (_) {}
+  }
+
   Future<void> _addWater(int amountMl) async {
     if (_isSaving) return;
 
@@ -79,20 +108,43 @@ class _WaterLoggingPageState extends ConsumerState<WaterLoggingPage> with Ticker
       _isSaving = true;
     });
 
-    // Optimistically update vertical level animation
-    final double prevPercent = _currentPercent;
-    _waterConsumed += amountMl;
-    _currentPercent = (_waterConsumed / _waterGoal).clamp(0.0, 1.0);
-
-    _levelAnimation = Tween<double>(begin: prevPercent, end: _currentPercent).animate(
-      CurvedAnimation(parent: _levelController, curve: Curves.easeOutCubic),
-    );
-    _levelController.forward(from: 0.0);
-
     try {
       final notifier = ref.read(summaryProvider.notifier);
       await notifier.addWaterQuick(amountMl);
+      await _fetchWaterEntries();
     } catch (_) {}
+
+    setState(() {
+      _isSaving = false;
+    });
+  }
+
+  Future<void> _deleteWaterEntry(String id) async {
+    if (_isSaving) return;
+
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      final apiService = ref.read(apiServiceProvider);
+      final response = await apiService.delete("${ApiConstants.water}$id");
+      if (response.success) {
+        // Refresh summary provider so the main dashboard is updated
+        await ref.read(summaryProvider.notifier).fetchSummary();
+        // Re-fetch local entries list and update total
+        await _fetchWaterEntries();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.error,
+            content: Text("Failed to delete water log: $e"),
+          ),
+        );
+      }
+    }
 
     setState(() {
       _isSaving = false;
@@ -102,10 +154,10 @@ class _WaterLoggingPageState extends ConsumerState<WaterLoggingPage> with Ticker
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft, color: Colors.white),
+          icon: Icon(LucideIcons.arrowLeft, color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => context.pop(),
         ),
         title: Text(
@@ -114,20 +166,21 @@ class _WaterLoggingPageState extends ConsumerState<WaterLoggingPage> with Ticker
         ),
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 24),
-            
-            // Centered Animated Wave Jar Container
-            Expanded(
-              child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Column(
+            children: [
+              const SizedBox(height: 16),
+              
+              // Centered Animated Wave Jar Container
+              Center(
                 child: Container(
-                  width: 250,
-                  height: 380,
+                  width: 230,
+                  height: 320,
                   decoration: BoxDecoration(
-                    color: AppColors.darkSurface,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(32),
-                    border: Border.all(color: AppColors.darkBorder, width: 3),
+                    border: Border.all(color: Theme.of(context).dividerColor, width: 3),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.blueAccent.withOpacity(0.05),
@@ -200,14 +253,11 @@ class _WaterLoggingPageState extends ConsumerState<WaterLoggingPage> with Ticker
                   ),
                 ),
               ),
-            ),
-            
-            const SizedBox(height: 32),
-
-            // Quick add portion log buttons
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-              child: Row(
+              
+              const SizedBox(height: 24),
+  
+              // Quick add portion log buttons
+              Row(
                 children: [
                   _buildIncrementButton("Cups", "+250", 250, LucideIcons.glassWater),
                   const SizedBox(width: 12),
@@ -216,9 +266,91 @@ class _WaterLoggingPageState extends ConsumerState<WaterLoggingPage> with Ticker
                   _buildIncrementButton("Large", "+750", 750, LucideIcons.droplet),
                 ],
               ),
-            ),
-            const SizedBox(height: 16),
-          ],
+              
+              const SizedBox(height: 32),
+
+              // Logged Water Entries List Section
+              if (_waterEntries.isNotEmpty) ...[
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Today's Logs",
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: _waterEntries.length,
+                  separatorBuilder: (context, index) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final entry = _waterEntries[index];
+                    final amount = entry['amount_ml'] as int? ?? 0;
+                    final loggedAtStr = entry['logged_at'] as String? ?? '';
+                    
+                    // Parse logged_at time (e.g. 2026-06-15T14:43:30.000Z)
+                    String displayTime = '';
+                    try {
+                      final parsedTime = DateTime.parse(loggedAtStr).toLocal();
+                      displayTime = DateFormat('hh:mm a').format(parsedTime);
+                    } catch (_) {}
+                    
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Theme.of(context).dividerColor),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(LucideIcons.glassWater, color: Colors.blueAccent, size: 20),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "$amount ml",
+                                    style: GoogleFonts.outfit(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  if (displayTime.isNotEmpty)
+                                    Text(
+                                      displayTime,
+                                      style: GoogleFonts.outfit(
+                                        color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          IconButton(
+                            icon: const Icon(LucideIcons.trash2, color: AppColors.error, size: 20),
+                            onPressed: _isSaving ? null : () => _deleteWaterEntry(entry['id'] as String),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );
@@ -232,9 +364,9 @@ class _WaterLoggingPageState extends ConsumerState<WaterLoggingPage> with Ticker
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
-            color: AppColors.darkSurface,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.darkBorder),
+            border: Border.all(color: Theme.of(context).dividerColor),
           ),
           child: Column(
             children: [
@@ -251,7 +383,7 @@ class _WaterLoggingPageState extends ConsumerState<WaterLoggingPage> with Ticker
               Text(
                 label,
                 style: GoogleFonts.outfit(
-                  color: AppColors.darkTextSecondary,
+                  color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70,
                   fontSize: 11,
                 ),
               ),

@@ -57,7 +57,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             backgroundColor: AppColors.error,
             content: Text(
               e.toString().replaceAll("ApiException: ", ""),
-              style: GoogleFonts.outfit(color: Colors.white),
+              style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface),
             ),
           ),
         );
@@ -77,21 +77,21 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: _currentStep > 0
             ? IconButton(
-                icon: const Icon(LucideIcons.arrowLeft, color: Colors.white),
+                icon: Icon(LucideIcons.arrowLeft, color: Theme.of(context).colorScheme.onSurface),
                 onPressed: _prevStep,
               )
             : null,
         title: Text(
           "Step ${_currentStep + 1} of $_totalSteps",
-          style: GoogleFonts.outfit(fontSize: 16, color: AppColors.darkTextSecondary),
+          style: GoogleFonts.outfit(fontSize: 16, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70),
         ),
         actions: [
           IconButton(
-            icon: const Icon(LucideIcons.logOut, color: Colors.white),
+            icon: Icon(LucideIcons.logOut, color: Theme.of(context).colorScheme.onSurface),
             onPressed: () => ref.read(authProvider.notifier).logout(),
           ),
         ],
@@ -107,7 +107,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 child: LinearProgressIndicator(
                   value: (_currentStep + 1) / _totalSteps,
                   color: AppColors.primary,
-                  backgroundColor: AppColors.darkSurface,
+                  backgroundColor: Theme.of(context).colorScheme.surface,
                   minHeight: 6,
                 ),
               ),
@@ -167,12 +167,12 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           const SizedBox(height: 20),
           Text(
             "What is your primary goal?",
-            style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+            style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
           ),
           const SizedBox(height: 8),
           Text(
             "This helps us calculate your daily caloric needs and macronutrient thresholds.",
-            style: GoogleFonts.outfit(fontSize: 16, color: AppColors.darkTextSecondary),
+            style: GoogleFonts.outfit(fontSize: 16, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70),
           ),
           const SizedBox(height: 32),
           
@@ -216,18 +216,18 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           const SizedBox(height: 20),
           Text(
             "Tell us about yourself",
-            style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+            style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
           ),
           const SizedBox(height: 8),
           Text(
             "We use gender and age to compute your basal metabolic rate (BMR).",
-            style: GoogleFonts.outfit(fontSize: 16, color: AppColors.darkTextSecondary),
+            style: GoogleFonts.outfit(fontSize: 16, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70),
           ),
           const SizedBox(height: 32),
           
           Text(
             "Biological Gender",
-            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+            style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16),
           ),
           const SizedBox(height: 12),
           Row(
@@ -260,7 +260,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             children: [
               Text(
                 "Age",
-                style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16),
               ),
               Text(
                 "$_age years old",
@@ -275,7 +275,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             max: 80,
             divisions: 65,
             activeColor: AppColors.primary,
-            inactiveColor: AppColors.darkSurface,
+            inactiveColor: Theme.of(context).colorScheme.surface,
             onChanged: (val) {
               setState(() {
                 _age = val.round();
@@ -296,7 +296,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           const SizedBox(height: 20),
           Text(
             "Enter physical metrics",
-            style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+            style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
           ),
           const SizedBox(height: 32),
           
@@ -306,7 +306,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             children: [
               Text(
                 "Height",
-                style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16),
               ),
               Text(
                 "${_heightCm.round()} cm",
@@ -319,7 +319,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             min: 120,
             max: 220,
             activeColor: AppColors.primary,
-            inactiveColor: AppColors.darkSurface,
+            inactiveColor: Theme.of(context).colorScheme.surface,
             onChanged: (val) => setState(() => _heightCm = val),
           ),
           const SizedBox(height: 32),
@@ -330,7 +330,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             children: [
               Text(
                 "Current Weight",
-                style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16),
               ),
               Text(
                 "${_currentWeightKg.toStringAsFixed(1)} kg",
@@ -343,7 +343,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             min: 40,
             max: 150,
             activeColor: AppColors.primary,
-            inactiveColor: AppColors.darkSurface,
+            inactiveColor: Theme.of(context).colorScheme.surface,
             onChanged: (val) {
               setState(() {
                 _currentWeightKg = val;
@@ -367,7 +367,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               children: [
                 Text(
                   "Target Weight",
-                  style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                  style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 Text(
                   "${_targetWeightKg.toStringAsFixed(1)} kg",
@@ -380,7 +380,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               min: 40,
               max: 150,
               activeColor: AppColors.primary,
-              inactiveColor: AppColors.darkSurface,
+              inactiveColor: Theme.of(context).colorScheme.surface,
               onChanged: (val) {
                 // Bounds enforcement
                 if (_goalType == 'lose' && val >= _currentWeightKg) return;
@@ -403,7 +403,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           const SizedBox(height: 20),
           Text(
             "What is your activity level?",
-            style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+            style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
           ),
           const SizedBox(height: 24),
           
@@ -424,7 +424,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               children: [
                 Text(
                   "Weekly Pace",
-                  style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                  style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 Text(
                   "${_weeklyPaceKg.toStringAsFixed(2)} kg / week",
@@ -444,9 +444,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                       label: Text("${pace.toStringAsFixed(2)}"),
                       onSelected: (_) => setState(() => _weeklyPaceKg = pace),
                       selectedColor: AppColors.primary,
-                      backgroundColor: AppColors.darkSurface,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
                       labelStyle: TextStyle(
-                        color: isSelected ? Colors.black : Colors.white,
+                        color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -469,40 +469,40 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           const SizedBox(height: 20),
           Text(
             "Review your profile",
-            style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+            style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
           ),
           const SizedBox(height: 8),
           Text(
             "Our engine will compute your macros based on these details.",
-            style: GoogleFonts.outfit(fontSize: 16, color: AppColors.darkTextSecondary),
+            style: GoogleFonts.outfit(fontSize: 16, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70),
           ),
           const SizedBox(height: 32),
           
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppColors.darkSurface,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.darkBorder),
+              border: Border.all(color: Theme.of(context).dividerColor),
             ),
             child: Column(
               children: [
                 _buildSummaryRow("Primary Goal", _goalType.toUpperCase()),
-                const Divider(color: AppColors.darkBorder),
+                Divider(color: Theme.of(context).dividerColor),
                 _buildSummaryRow("Gender", _gender.toUpperCase()),
-                const Divider(color: AppColors.darkBorder),
+                Divider(color: Theme.of(context).dividerColor),
                 _buildSummaryRow("Age", "$_age years old"),
-                const Divider(color: AppColors.darkBorder),
+                Divider(color: Theme.of(context).dividerColor),
                 _buildSummaryRow("Height", "${_heightCm.round()} cm"),
-                const Divider(color: AppColors.darkBorder),
+                Divider(color: Theme.of(context).dividerColor),
                 _buildSummaryRow("Weight", "${_currentWeightKg.toStringAsFixed(1)} kg"),
                 if (_goalType != 'maintain') ...[
-                  const Divider(color: AppColors.darkBorder),
+                  Divider(color: Theme.of(context).dividerColor),
                   _buildSummaryRow("Target Weight", "${_targetWeightKg.toStringAsFixed(1)} kg"),
-                  const Divider(color: AppColors.darkBorder),
+                  Divider(color: Theme.of(context).dividerColor),
                   _buildSummaryRow("Weekly Pace", "${_weeklyPaceKg} kg/week"),
                 ],
-                const Divider(color: AppColors.darkBorder),
+                Divider(color: Theme.of(context).dividerColor),
                 _buildSummaryRow("Activity Level", _activityLevel.replaceAll("_", " ").toUpperCase()),
               ],
             ),
@@ -528,16 +528,16 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.08) : AppColors.darkSurface,
+          color: isSelected ? AppColors.primary.withOpacity(0.08) : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.darkBorder,
+            color: isSelected ? AppColors.primary : Theme.of(context).dividerColor,
             width: isSelected ? 2 : 1,
           ),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 36, color: isSelected ? AppColors.primary : AppColors.darkTextSecondary),
+            Icon(icon, size: 36, color: isSelected ? AppColors.primary : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -546,7 +546,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   Text(
                     title,
                     style: GoogleFonts.outfit(
-                      color: Colors.white,
+                      color: isSelected ? AppColors.primary : Theme.of(context).colorScheme.onSurface,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),
@@ -555,7 +555,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   Text(
                     subtitle,
                     style: GoogleFonts.outfit(
-                      color: AppColors.darkTextSecondary,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70,
                       fontSize: 14,
                     ),
                   ),
@@ -581,22 +581,22 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       child: Container(
         height: 60,
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.08) : AppColors.darkSurface,
+          color: isSelected ? AppColors.primary.withOpacity(0.08) : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.darkBorder,
+            color: isSelected ? AppColors.primary : Theme.of(context).dividerColor,
             width: isSelected ? 2 : 1,
           ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: isSelected ? AppColors.primary : AppColors.darkTextSecondary),
+            Icon(icon, color: isSelected ? AppColors.primary : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70),
             const SizedBox(width: 8),
             Text(
               title,
               style: GoogleFonts.outfit(
-                color: isSelected ? Colors.white : AppColors.darkTextSecondary,
+                color: isSelected ? AppColors.primary : Theme.of(context).colorScheme.onSurface,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -613,10 +613,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.08) : AppColors.darkSurface,
+          color: isSelected ? AppColors.primary.withOpacity(0.08) : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.darkBorder,
+            color: isSelected ? AppColors.primary : Theme.of(context).dividerColor,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -628,11 +628,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
+                    style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
                   ),
                   Text(
                     desc,
-                    style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 13),
+                    style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 13),
                   ),
                 ],
               ),
@@ -650,8 +650,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 15)),
-          Text(val, style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+          Text(label, style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 15)),
+          Text(val, style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 15)),
         ],
       ),
     );

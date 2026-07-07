@@ -72,6 +72,31 @@ async def global_exception_handler(request: Request, exc: Exception):
                 "detail": exc.detail
             }
         )
+    
+    # Detect database / connection pool errors and return a proper 503
+    exc_str = str(exc).lower()
+    exc_type = type(exc).__name__
+    is_db_error = any(kw in exc_str for kw in [
+        "ssl connection", "connection was closed", "connection reset",
+        "too many connections", "connection pool", "asyncpg",
+        "server closed the connection", "broken pipe",
+        "could not connect", "connection timed out",
+    ]) or any(kw in exc_type for kw in [
+        "ConnectionDoesNotExistError", "TooManyConnectionsError",
+        "PostgresConnectionError", "InterfaceError",
+    ])
+    
+    if is_db_error:
+        logger.error(f"Database connection error on {request.url.path}: {exc}")
+        return JSONResponse(
+            status_code=503,
+            content={
+                "success": False,
+                "error": "ServiceUnavailable",
+                "detail": "The database is temporarily unavailable. Please try again in a few moments."
+            }
+        )
+
     logger.exception(f"Unhandled exception occurred on path {request.url.path}: {exc}")
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -82,14 +107,68 @@ async def global_exception_handler(request: Request, exc: Exception):
         }
     )
 
-# Root Healthcheck Endpoint
+# Root Healthcheck Endpoint (With SMTP & Resend Diagnostics)
 @app.get("/health", tags=["Health"])
 async def health_check():
+    import os
+    import httpx
+    from app.core.config import ENV_FILE, BASE_DIR
+    
+    # Read keys from .env file directly if it exists
+    env_keys = []
+    env_file_exists = os.path.exists(ENV_FILE)
+    if env_file_exists:
+        try:
+            with open(ENV_FILE, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        key = line.split("=", 1)[0].strip()
+                        env_keys.append(key)
+        except Exception as e:
+            env_keys.append(f"error_reading: {str(e)}")
+            
+    # Test connection to Google Gemini API
+    gemini_test_result = "Not tested (API Key missing)"
+    if settings.GEMINI_API_KEY:
+        try:
+            headers = {
+                "Content-Type": "application/json",
+                "x-goog-api-key": settings.GEMINI_API_KEY
+            }
+            url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+            payload = {
+                "contents": [{"parts": [{"text": "Hello"}]}]
+            }
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.post(url, headers=headers, json=payload)
+                if resp.status_code == 200:
+                    try:
+                        reply = resp.json().get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '').strip()
+                        gemini_test_result = f"Success: {reply}"
+                    except Exception as parse_err:
+                        gemini_test_result = f"Success (status 200) but parse error: {str(parse_err)}"
+                else:
+                    gemini_test_result = f"Failed (HTTP {resp.status_code}): {resp.text}"
+        except Exception as e:
+            gemini_test_result = f"Connection Error: {str(e)}"
+
     return {
         "success": True,
         "data": {
             "status": "healthy",
-            "environment": settings.ENVIRONMENT
+            "environment": settings.ENVIRONMENT,
+            "has_smtp_password": bool(settings.SMTP_PASSWORD),
+            "smtp_password_starts_with_re": settings.SMTP_PASSWORD.startswith("re_") if settings.SMTP_PASSWORD else False,
+            "smtp_from_email": settings.SMTP_FROM_EMAIL,
+            "gemini_test_connection": gemini_test_result,
+            "diagnostics": {
+                "base_dir": BASE_DIR,
+                "env_file_path": ENV_FILE,
+                "env_file_exists": env_file_exists,
+                "env_file_keys_found": env_keys,
+                "os_environ_keys": [k for k in os.environ.keys() if "SMTP" in k or "DATABASE" in k or "ENVIRONMENT" in k or "GEMINI" in k]
+            }
         },
         "message": "NutriVault Backend API is healthy"
     }

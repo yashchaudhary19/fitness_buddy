@@ -6,10 +6,6 @@ from typing import List
 # Get the directory where config.py is located
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ENV_FILE = os.path.join(BASE_DIR, ".env")
-print(f"DEBUG: BASE_DIR={BASE_DIR}")
-print(f"DEBUG: ENV_FILE={ENV_FILE}")
-print(f"DEBUG: EXISTS={os.path.exists(ENV_FILE)}")
-
 # Explicitly override os.environ with .env contents to prevent OS-level env vars from taking precedence
 if os.path.exists(ENV_FILE):
     with open(ENV_FILE, "r", encoding="utf-8") as f:
@@ -42,7 +38,7 @@ class Settings(BaseSettings):
 
     # Google Gemini API
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-flash-latest"
+    GEMINI_MODEL: str = "gemini-2.0-flash"
 
     # Cloudinary (Progress Photos & Meal Scan Images)
     CLOUDINARY_CLOUD_NAME: str = ""
@@ -54,8 +50,16 @@ class Settings(BaseSettings):
     FOOD_CACHE_TTL_SECONDS: int = 86400
     BARCODE_CACHE_TTL_SECONDS: int = 604800
 
+    # SMTP Settings (For Email OTP)
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM_EMAIL: str = ""
+
     # App Settings
     ENVIRONMENT: str = "development"
+
     ALLOWED_ORIGINS: str = "http://localhost,http://10.0.2.2,http://127.0.0.1"
 
     @property
@@ -73,4 +77,4 @@ def _resolve_sqlite_url(database_url: str) -> str:
 
 settings = Settings()
 settings.DATABASE_URL = _resolve_sqlite_url(settings.DATABASE_URL)
-print(f"DEBUG: FINAL_DATABASE_URL={settings.DATABASE_URL}")
+

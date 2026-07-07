@@ -83,9 +83,9 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              AppColors.darkSurface,
+              Theme.of(context).colorScheme.surface,
               AppColors.primary.withOpacity(0.08),
-              AppColors.darkSurface,
+              Theme.of(context).colorScheme.surface,
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -135,7 +135,7 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
                   Text(
                     "Get unlimited AI coaching & clean ad-free tracking.",
                     style: GoogleFonts.outfit(
-                      color: AppColors.darkTextSecondary,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70,
                       fontSize: 11,
                     ),
                     maxLines: 1,
@@ -147,7 +147,7 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
             const SizedBox(width: 8),
             Icon(
               Icons.chevron_right,
-              color: AppColors.darkTextSecondary.withOpacity(0.5),
+              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70.withOpacity(0.5),
               size: 20,
             ),
           ],

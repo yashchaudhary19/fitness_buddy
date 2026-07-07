@@ -33,7 +33,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -44,7 +44,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
               style: GoogleFonts.outfit(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: AppColors.darkTextSecondary,
+                color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70,
               ),
             ),
             const SizedBox(height: 4),
@@ -89,7 +89,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
                   style: GoogleFonts.outfit(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onSurface,
                     height: 1.3,
                   ),
                   textAlign: TextAlign.center,
@@ -172,7 +172,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
               "Version 1.0.0",
               style: GoogleFonts.outfit(
                 fontSize: 12,
-                color: AppColors.darkTextSecondary.withOpacity(0.5),
+                color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70.withOpacity(0.5),
               ),
             ),
             const SizedBox(height: 16),
@@ -236,7 +236,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
                           Text(
                             "Last 7 days",
                             style: GoogleFonts.outfit(
-                              color: AppColors.darkTextSecondary,
+                              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70,
                               fontSize: 10,
                             ),
                           ),
@@ -280,7 +280,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
           color: const Color(0xFF1E294B), // Premium dark container
-          border: Border.all(color: AppColors.darkBorder.withOpacity(0.5)),
+          border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.5)),
         ),
         padding: const EdgeInsets.all(20),
         child: Column(

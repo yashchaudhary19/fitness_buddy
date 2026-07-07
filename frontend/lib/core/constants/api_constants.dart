@@ -4,6 +4,8 @@ class ApiConstants {
   // Auth paths
   static const String register = "/api/auth/register";
   static const String login = "/api/auth/login";
+  static const String sendOtp = "/api/auth/send-otp";
+  static const String verifyOtp = "/api/auth/verify-otp";
   static const String refresh = "/api/auth/refresh";
   static const String logout = "/api/auth/logout";
   static const String me = "/api/auth/me";

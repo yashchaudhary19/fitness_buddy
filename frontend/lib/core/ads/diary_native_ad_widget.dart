@@ -60,9 +60,9 @@ class _DiaryNativeAdWidgetState extends State<DiaryNativeAdWidget> {
       width: double.infinity,
       height: _bannerAd!.size.height.toDouble(),
       decoration: BoxDecoration(
-        color: AppColors.darkSurface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.darkBorder),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),

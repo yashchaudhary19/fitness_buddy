@@ -48,10 +48,10 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: AppColors.darkSurface,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: AppColors.darkBorder),
+            side: BorderSide(color: Theme.of(context).dividerColor),
           ),
           title: Row(
             children: [
@@ -59,20 +59,20 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
               const SizedBox(width: 10),
               Text(
                 "Unlock AI Response",
-                style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 18),
               ),
             ],
           ),
           content: Text(
             "Watch a quick sponsor video to get a detailed response from your AI Health Coach.",
-            style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 14),
+            style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 14),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
                 "Cancel",
-                style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontWeight: FontWeight.w600),
+                style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontWeight: FontWeight.w600),
               ),
             ),
             ElevatedButton(
@@ -94,7 +94,7 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
                         backgroundColor: AppColors.error,
                         content: Text(
                           "Failed to load ad. Please try again.",
-                          style: GoogleFonts.outfit(color: Colors.white),
+                          style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface),
                         ),
                       ),
                     );
@@ -138,7 +138,7 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           "AI Coach",
@@ -146,7 +146,7 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(LucideIcons.trash2, size: 20, color: AppColors.darkTextSecondary),
+            icon: Icon(LucideIcons.trash2, size: 20, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70),
             onPressed: () {
               ref.read(aiChatProvider.notifier).clearChat();
             },
@@ -166,11 +166,11 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(LucideIcons.bot, color: AppColors.darkTextSecondary.withOpacity(0.5), size: 48),
+                          Icon(LucideIcons.bot, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70.withOpacity(0.5), size: 48),
                           const SizedBox(height: 12),
                           Text(
                             "No messages yet. Ask something!",
-                            style: GoogleFonts.outfit(color: AppColors.darkTextSecondary),
+                            style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70),
                           ),
                         ],
                       ),
@@ -206,7 +206,7 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
                     Text(
                       "Coach is thinking...",
                       style: GoogleFonts.outfit(
-                        color: AppColors.darkTextSecondary,
+                        color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70,
                         fontSize: 12,
                       ),
                     )
@@ -230,10 +230,10 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
                       child: ActionChip(
                         label: Text(
                           suggestion,
-                          style: GoogleFonts.outfit(fontSize: 12, color: Colors.white),
+                          style: GoogleFonts.outfit(fontSize: 12, color: Theme.of(context).colorScheme.onSurface),
                         ),
-                        backgroundColor: AppColors.darkSurface,
-                        side: BorderSide(color: AppColors.darkBorder.withOpacity(0.4)),
+                        backgroundColor: Theme.of(context).colorScheme.surface,
+                        side: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.4)),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         onPressed: () {
                           _promptAndSend(suggestion);
@@ -260,7 +260,7 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
         margin: const EdgeInsets.symmetric(vertical: 6.0),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isUser ? AppColors.secondary : AppColors.darkSurface,
+          color: isUser ? AppColors.secondary : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
@@ -269,7 +269,7 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
           ),
           border: isUser
               ? null
-              : Border.all(color: AppColors.darkBorder.withOpacity(0.3), width: 1),
+              : Border.all(color: Theme.of(context).dividerColor.withOpacity(0.3), width: 1),
         ),
         child: Text(
           msg.content,
@@ -287,9 +287,9 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.darkSurface,
+        color: Theme.of(context).colorScheme.surface,
         border: Border(
-          top: BorderSide(color: AppColors.darkBorder.withOpacity(0.4), width: 1),
+          top: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.4), width: 1),
         ),
       ),
       child: Row(
@@ -298,12 +298,12 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
             child: TextField(
               controller: _messageController,
               enabled: !isLoading,
-              style: GoogleFonts.outfit(color: Colors.white, fontSize: 14),
+              style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontSize: 14),
               decoration: InputDecoration(
                 hintText: "Ask Fitness Buddy...",
-                hintStyle: GoogleFonts.outfit(color: AppColors.darkTextSecondary.withOpacity(0.6)),
+                hintStyle: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70.withOpacity(0.6)),
                 filled: true,
-                fillColor: AppColors.darkBackground,
+                fillColor: Theme.of(context).scaffoldBackgroundColor,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
@@ -319,12 +319,12 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isLoading ? AppColors.darkBorder : AppColors.primary,
+                color: isLoading ? Theme.of(context).dividerColor : AppColors.primary,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 isLoading ? LucideIcons.loader2 : LucideIcons.sendHorizontal,
-                color: isLoading ? AppColors.darkTextSecondary : Colors.black,
+                color: isLoading ? Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70 : Colors.black,
                 size: 18,
               ),
             ),

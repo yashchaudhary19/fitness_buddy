@@ -42,7 +42,7 @@ class _SplashPageState extends ConsumerState<SplashPage> with SingleTickerProvid
     ref.listen(authProvider, (previous, next) {});
 
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -90,7 +90,7 @@ class _SplashPageState extends ConsumerState<SplashPage> with SingleTickerProvid
               "Your AI-Powered Nutrition Coach",
               style: GoogleFonts.outfit(
                 fontSize: 16,
-                color: AppColors.darkTextSecondary,
+                color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70,
               ),
             ),
             const SizedBox(height: 64),
@@ -100,9 +100,9 @@ class _SplashPageState extends ConsumerState<SplashPage> with SingleTickerProvid
               width: 150,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(4),
-                child: const LinearProgressIndicator(
+                child: LinearProgressIndicator(
                   color: AppColors.primary,
-                  backgroundColor: AppColors.darkSurface,
+                  backgroundColor: Theme.of(context).colorScheme.surface,
                 ),
               ),
             ),

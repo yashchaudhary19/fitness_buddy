@@ -16,6 +16,7 @@ import 'package:frontend/features/diary/providers/search_provider.dart';
 import 'package:frontend/features/diary/providers/diary_provider.dart';
 import 'package:frontend/core/ads/ad_service.dart';
 import 'package:frontend/core/ads/obsidian_native_ad_widget.dart';
+import 'package:frontend/shared/widgets/premium_error_view.dart';
 
 class LogFoodPage extends ConsumerStatefulWidget {
   const LogFoodPage({super.key});
@@ -63,7 +64,7 @@ class _LogFoodPageState extends ConsumerState<LogFoodPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.darkSurface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -98,7 +99,7 @@ class _LogFoodPageState extends ConsumerState<LogFoodPage> {
     final state = ref.watch(searchProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(LucideIcons.arrowLeft, color: Colors.white),
@@ -113,7 +114,7 @@ class _LogFoodPageState extends ConsumerState<LogFoodPage> {
         child: Column(
           children: [
             // AI / Camera / Voice Shortcuts Row
-            _buildLogShortcuts(context),
+            _buildLogShortcuts(),
             
             // Search Input Box
             Padding(
@@ -121,13 +122,13 @@ class _LogFoodPageState extends ConsumerState<LogFoodPage> {
               child: TextField(
                 controller: _searchController,
                 onChanged: _onSearchChanged,
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                 decoration: InputDecoration(
-                  prefixIcon: const Icon(LucideIcons.search, color: AppColors.darkTextSecondary),
+                  prefixIcon: Icon(LucideIcons.search, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70),
                   hintText: "Search food name, brand, ingredients...",
                   suffixIcon: _searchController.text.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(LucideIcons.x, color: AppColors.darkTextSecondary),
+                          icon: Icon(LucideIcons.x, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70),
                           onPressed: () {
                             _searchController.clear();
                             _onSearchChanged('');
@@ -160,7 +161,7 @@ class _LogFoodPageState extends ConsumerState<LogFoodPage> {
                                       if (isCurrentAd || isNextAd) {
                                         return const SizedBox.shrink();
                                       }
-                                      return const Divider(color: AppColors.darkBorder, height: 1);
+                                      return Divider(color: Theme.of(context).dividerColor, height: 1);
                                     },
                                     itemBuilder: (context, index) {
                                       final isAd = (index + 1) % 5 == 0;
@@ -177,11 +178,11 @@ class _LogFoodPageState extends ConsumerState<LogFoodPage> {
                                         contentPadding: const EdgeInsets.symmetric(vertical: 8),
                                         title: Text(
                                           food.name,
-                                          style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
+                                          style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
                                         ),
                                         subtitle: Text(
                                           food.brand ?? "Generic Brand",
-                                          style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 13),
+                                          style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 13),
                                         ),
                                         trailing: Row(
                                           mainAxisSize: MainAxisSize.min,
@@ -196,12 +197,12 @@ class _LogFoodPageState extends ConsumerState<LogFoodPage> {
                                                 ),
                                                 Text(
                                                   "per 100g",
-                                                  style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 11),
+                                                  style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 11),
                                                 ),
                                               ],
                                             ),
                                             const SizedBox(width: 8),
-                                            const Icon(LucideIcons.chevronRight, color: AppColors.darkTextSecondary, size: 18),
+                                            Icon(LucideIcons.chevronRight, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, size: 18),
                                           ],
                                         ),
                                         onTap: () => _showServingSheet(context, food),
@@ -218,7 +219,7 @@ class _LogFoodPageState extends ConsumerState<LogFoodPage> {
 
   // --- LOG OPTIONS ROW ---
 
-  Widget _buildLogShortcuts(BuildContext context) {
+  Widget _buildLogShortcuts() {
     return Padding(
       padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 8),
       child: Row(
@@ -278,9 +279,9 @@ class _LogFoodPageState extends ConsumerState<LogFoodPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.darkSurface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.darkBorder),
+          border: Border.all(color: Theme.of(context).dividerColor),
         ),
         child: Column(
           children: [
@@ -307,16 +308,16 @@ class _LogFoodPageState extends ConsumerState<LogFoodPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(LucideIcons.search, size: 48, color: AppColors.darkBorder),
+          Icon(LucideIcons.search, size: 48, color: Theme.of(context).dividerColor),
           const SizedBox(height: 16),
           Text(
             "Search for Foods",
-            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+            style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 18),
           ),
           const SizedBox(height: 8),
           Text(
             "Type a food name or try scanning with AI shortcuts above.",
-            style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 14),
+            style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 14),
             textAlign: TextAlign.center,
           ),
         ],
@@ -331,16 +332,16 @@ class _LogFoodPageState extends ConsumerState<LogFoodPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(LucideIcons.frown, size: 48, color: AppColors.darkBorder),
+            Icon(LucideIcons.frown, size: 48, color: Theme.of(context).dividerColor),
             const SizedBox(height: 16),
             Text(
               "No foods found",
-              style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+              style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 18),
             ),
             const SizedBox(height: 8),
             Text(
               "We couldn't find matches. Try scanning a barcode or typing something else.",
-              style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 14),
+              style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 14),
               textAlign: TextAlign.center,
             ),
           ],
@@ -350,15 +351,10 @@ class _LogFoodPageState extends ConsumerState<LogFoodPage> {
   }
 
   Widget _buildErrorView(String error) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Text(
-          error,
-          style: GoogleFonts.outfit(color: AppColors.error, fontSize: 14),
-          textAlign: TextAlign.center,
-        ),
-      ),
+    return PremiumErrorView(
+      errorMessage: error,
+      onRetry: () => ref.read(searchProvider.notifier).searchFoods(_searchController.text),
+      title: "Could not complete search",
     );
   }
 
@@ -369,20 +365,20 @@ class _LogFoodPageState extends ConsumerState<LogFoodPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: AppColors.darkSurface,
-          title: Text("Scan Barcode", style: GoogleFonts.outfit(color: Colors.white)),
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          title: Text("Scan Barcode", style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 "Enter barcode number manually (e.g. 5449000000096 for Coca-Cola, or scan camera):",
-                style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 14),
+                style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 14),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: barcodeController,
                 keyboardType: TextInputType.number,
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                 decoration: const InputDecoration(
                   hintText: "Enter barcode...",
                 ),
@@ -408,7 +404,7 @@ class _LogFoodPageState extends ConsumerState<LogFoodPage> {
                         backgroundColor: AppColors.error,
                         content: Text(
                           "Barcode $code not found on Open Food Facts.",
-                          style: GoogleFonts.outfit(color: Colors.white),
+                          style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface),
                         ),
                       ),
                     );
@@ -427,7 +423,7 @@ class _LogFoodPageState extends ConsumerState<LogFoodPage> {
   void _showVoicePanel(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.darkSurface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -482,11 +478,11 @@ class _ServingDetailSheetState extends ConsumerState<_ServingDetailSheet> {
           // Header details
           Text(
             widget.food.name,
-            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22),
+            style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 22),
           ),
           Text(
             widget.food.brand ?? "Generic Brand",
-            style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 14),
+            style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 14),
           ),
           const SizedBox(height: 24),
 
@@ -496,7 +492,7 @@ class _ServingDetailSheetState extends ConsumerState<_ServingDetailSheet> {
               Expanded(
                 child: Text(
                   "Serving Size (grams)",
-                  style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                  style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ),
               SizedBox(
@@ -504,7 +500,7 @@ class _ServingDetailSheetState extends ConsumerState<_ServingDetailSheet> {
                 child: TextFormField(
                   initialValue: _servingSizeG.round().toString(),
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                   decoration: const InputDecoration(
                     contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -537,7 +533,7 @@ class _ServingDetailSheetState extends ConsumerState<_ServingDetailSheet> {
               children: [
                 Text(
                   "Calculated Calories",
-                  style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                  style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 15),
                 ),
                 Text(
                   "${calories.round()} kcal",
@@ -551,7 +547,7 @@ class _ServingDetailSheetState extends ConsumerState<_ServingDetailSheet> {
           // Live Macros sliders
           Text(
             "Nutrient Breakdown",
-            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+            style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 14),
           ),
           const SizedBox(height: 12),
           _buildMacroRow("Carbohydrates", carbs, AppColors.secondary),
@@ -586,7 +582,7 @@ class _ServingDetailSheetState extends ConsumerState<_ServingDetailSheet> {
                             backgroundColor: AppColors.error,
                             content: Text(
                               "Failed to log food entry. Please try again.",
-                              style: GoogleFonts.outfit(color: Colors.white),
+                              style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface),
                             ),
                           ),
                         );
@@ -613,12 +609,12 @@ class _ServingDetailSheetState extends ConsumerState<_ServingDetailSheet> {
           children: [
             Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
             const SizedBox(width: 8),
-            Text(label, style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 14)),
+            Text(label, style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 14)),
           ],
         ),
         Text(
           "${amount.toStringAsFixed(1)} g",
-          style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
+          style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w600, fontSize: 14),
         ),
       ],
     );
@@ -879,10 +875,10 @@ class _VoiceLoggingSheetState extends ConsumerState<_VoiceLoggingSheet> with Sin
             children: [
               Text(
                 "AI Voice & Text Logger",
-                style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
+                style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 20),
               ),
               IconButton(
-                icon: const Icon(LucideIcons.x, color: AppColors.darkTextSecondary),
+                icon: Icon(LucideIcons.x, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70),
                 onPressed: () => context.pop(),
               ),
             ],
@@ -890,24 +886,24 @@ class _VoiceLoggingSheetState extends ConsumerState<_VoiceLoggingSheet> with Sin
           const SizedBox(height: 8),
           Text(
             "Describe what you ate in natural language (e.g. \"I had 2 boiled eggs and an avocado for breakfast\"). AI will parse and log it instantly.",
-            style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 13),
+            style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 13),
           ),
           const SizedBox(height: 20),
           Container(
             decoration: BoxDecoration(
-              color: AppColors.darkBackground,
+              color: Theme.of(context).scaffoldBackgroundColor,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.darkBorder),
+              border: Border.all(color: Theme.of(context).dividerColor),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: TextField(
               controller: _textController,
               maxLines: 4,
               minLines: 2,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
-              decoration: const InputDecoration(
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 14),
+              decoration: InputDecoration(
                 hintText: "Speak or type your food log here...",
-                hintStyle: TextStyle(color: AppColors.darkTextSecondary, fontSize: 14),
+                hintStyle: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 14),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
@@ -932,7 +928,7 @@ class _VoiceLoggingSheetState extends ConsumerState<_VoiceLoggingSheet> with Sin
               ),
               child: Text(
                 _transcription,
-                style: GoogleFonts.outfit(color: Colors.white, fontSize: 14),
+                style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontSize: 14),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -990,7 +986,7 @@ class _VoiceLoggingSheetState extends ConsumerState<_VoiceLoggingSheet> with Sin
               ),
               const SizedBox(width: 24),
               IconButton(
-                icon: const Icon(LucideIcons.trash2, color: AppColors.darkTextSecondary, size: 24),
+                icon: Icon(LucideIcons.trash2, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, size: 24),
                 onPressed: () {
                   setState(() {
                     _textController.clear();
@@ -1021,7 +1017,7 @@ class _VoiceLoggingSheetState extends ConsumerState<_VoiceLoggingSheet> with Sin
                     },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.accent,
-                disabledBackgroundColor: AppColors.darkBorder,
+                disabledBackgroundColor: Theme.of(context).dividerColor,
               ),
               child: _isProcessing
                   ? const SizedBox(

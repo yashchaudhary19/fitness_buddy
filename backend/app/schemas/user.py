@@ -50,3 +50,13 @@ class TokenRefreshRequest(BaseModel):
 class TokenRefreshResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+class OTPSendRequest(BaseModel):
+    email: EmailStr
+    flow: Optional[str] = "login"
+
+class OTPVerifyRequest(BaseModel):
+    email: EmailStr
+    code: str = Field(..., min_length=6, max_length=6)
+    name: Optional[str] = Field(None, max_length=100)
+

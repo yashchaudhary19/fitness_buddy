@@ -35,7 +35,6 @@ class _DashboardFrameState extends ConsumerState<DashboardFrame> {
     final connectivity = ref.watch(connectivityProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
       body: Stack(
         children: [
           // Screen Page Body (leaving bottom spacing for floating nav bar)
@@ -64,7 +63,7 @@ class _DashboardFrameState extends ConsumerState<DashboardFrame> {
                       const SizedBox(width: 8),
                       Text(
                         "Offline Mode - Disconnected from server",
-                        style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                        style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 13),
                       ),
                     ],
                   ),
@@ -84,10 +83,10 @@ class _DashboardFrameState extends ConsumerState<DashboardFrame> {
                 child: Container(
                   height: 76,
                   decoration: BoxDecoration(
-                    color: AppColors.darkSurface.withOpacity(0.8),
+                    color: Theme.of(context).colorScheme.surface.withOpacity(0.8),
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: AppColors.darkBorder.withOpacity(0.5),
+                      color: Theme.of(context).dividerColor.withOpacity(0.5),
                       width: 1.5,
                     ),
                     boxShadow: [
@@ -145,7 +144,7 @@ class _DashboardFrameState extends ConsumerState<DashboardFrame> {
                 ),
                 child: Icon(
                   icon,
-                  color: isSelected ? AppColors.primary : AppColors.darkTextSecondary,
+                  color: isSelected ? AppColors.primary : Theme.of(context).textTheme.bodyMedium?.color,
                   size: 24,
                 ),
               ),
@@ -156,7 +155,7 @@ class _DashboardFrameState extends ConsumerState<DashboardFrame> {
                 style: GoogleFonts.outfit(
                   fontSize: 10,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? AppColors.primary : AppColors.darkTextSecondary,
+                  color: isSelected ? AppColors.primary : Theme.of(context).textTheme.bodyMedium?.color,
                 ),
               ),
             ],

@@ -8,6 +8,7 @@ from app.models.weight import WeightEntry
 from app.models.measurement import BodyMeasurement
 from app.models.token import RefreshToken
 from app.models.app_settings import AppSettings
+from app.models.otp import OTPCode
 
 __all__ = [
     "Base",
@@ -29,4 +30,6 @@ __all__ = [
     "BodyMeasurement",
     "RefreshToken",
     "AppSettings",
+    "OTPCode",
 ]
+

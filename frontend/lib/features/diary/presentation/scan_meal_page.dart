@@ -140,8 +140,8 @@ class _ScanMealPageState extends ConsumerState<ScanMealPage> {
       final dateStr = DateFormat('yyyy-MM-dd').format(ref.read(summaryProvider).selectedDate);
       final detectedItems = _analysisResults!['items'] as List? ?? [];
 
-      // Log each detected item to the diary
-      for (final item in detectedItems) {
+      // Run logging for all items in parallel using Future.wait
+      final logFutures = detectedItems.map((item) async {
         final Map<String, dynamic> itemMap = item as Map<String, dynamic>;
 
         // 1. Create custom food first
@@ -154,9 +154,9 @@ class _ScanMealPageState extends ConsumerState<ScanMealPage> {
             'carbs_per_100g': (itemMap['carbs_per_100g'] as num? ?? 0.0).toDouble(),
             'protein_per_100g': (itemMap['protein_per_100g'] as num? ?? 0.0).toDouble(),
             'fat_per_100g': (itemMap['fat_per_100g'] as num? ?? 0.0).toDouble(),
-            'fiber_per_100g': 0.0,
-            'sugar_per_100g': 0.0,
-            'sodium_per_100g': 0.0,
+            'fiber_per_100g': (itemMap['fiber_per_100g'] as num? ?? 0.0).toDouble(),
+            'sugar_per_100g': (itemMap['sugar_per_100g'] as num? ?? 0.0).toDouble(),
+            'sodium_per_100g': (itemMap['sodium_per_100g'] as num? ?? 0.0).toDouble(),
             'saturated_fat_per_100g': 0.0,
           },
         );
@@ -166,7 +166,7 @@ class _ScanMealPageState extends ConsumerState<ScanMealPage> {
           final foodId = createdFood['id'];
 
           // 2. Log entry with foodId
-          await apiService.post(
+          final entryResponse = await apiService.post(
             ApiConstants.diaryEntries,
             data: {
               'food_item_id': foodId,
@@ -175,10 +175,15 @@ class _ScanMealPageState extends ConsumerState<ScanMealPage> {
               'log_date': dateStr,
             },
           );
+          if (!entryResponse.success) {
+            throw ApiException(entryResponse.error ?? "Failed to log diary entry.");
+          }
         } else {
           throw ApiException(foodResponse.error ?? "Failed to save scanned food item.");
         }
-      }
+      }).toList();
+
+      await Future.wait(logFutures);
 
       // Refresh providers
       ref.read(summaryProvider.notifier).fetchSummary();
@@ -219,10 +224,10 @@ class _ScanMealPageState extends ConsumerState<ScanMealPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft, color: Colors.white),
+          icon: Icon(LucideIcons.arrowLeft, color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => context.pop(),
         ),
         title: Text(
@@ -268,7 +273,7 @@ class _ScanMealPageState extends ConsumerState<ScanMealPage> {
                         _loadingStage == 1
                             ? "AI scanning meal photo..."
                             : "AI estimating portions & macros...",
-                        style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 14),
+                        style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 14),
                       ),
                     ],
                   ),
@@ -309,9 +314,9 @@ class _ScanMealPageState extends ConsumerState<ScanMealPage> {
       width: double.infinity,
       height: 260,
       decoration: BoxDecoration(
-        color: AppColors.darkSurface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.darkBorder),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
@@ -326,11 +331,11 @@ class _ScanMealPageState extends ConsumerState<ScanMealPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(LucideIcons.camera, size: 48, color: AppColors.darkBorder),
+                    Icon(LucideIcons.camera, size: 48, color: Theme.of(context).dividerColor),
                     const SizedBox(height: 16),
                     Text(
                       "Take or Upload a Food Photo",
-                      style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                      style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                     const SizedBox(height: 24),
                     Row(
@@ -357,43 +362,6 @@ class _ScanMealPageState extends ConsumerState<ScanMealPage> {
                 ),
               ),
       ),
-    );
-  }
-
-  Widget _buildMealTypeSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Log to which meal?",
-          style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: ['breakfast', 'lunch', 'dinner', 'snacks'].map((meal) {
-            final isSelected = _mealType == meal;
-            return Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: ChoiceChip(
-                  selected: isSelected,
-                  label: Text(
-                    "${meal[0].toUpperCase()}${meal.substring(1)}",
-                    style: GoogleFonts.outfit(fontSize: 12),
-                  ),
-                  onSelected: (_) => setState(() => _mealType = meal),
-                  selectedColor: AppColors.primary,
-                  backgroundColor: AppColors.darkSurface,
-                  labelStyle: TextStyle(
-                    color: isSelected ? Colors.black : Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      ],
     );
   }
 
@@ -424,7 +392,7 @@ class _ScanMealPageState extends ConsumerState<ScanMealPage> {
             const SizedBox(width: 8),
             Text(
               "AI Meal Report",
-              style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+              style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 18),
             ),
           ],
         ),
@@ -434,20 +402,20 @@ class _ScanMealPageState extends ConsumerState<ScanMealPage> {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: AppColors.darkSurface,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.darkBorder),
+            border: Border.all(color: Theme.of(context).dividerColor),
           ),
           child: Column(
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Total Calories", style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 15)),
+                  Text("Total Calories", style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 15)),
                   Text("${calories.round()} kcal", style: GoogleFonts.outfit(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 22)),
                 ],
               ),
-              const Divider(color: AppColors.darkBorder, height: 24),
+              Divider(color: Theme.of(context).dividerColor, height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -464,7 +432,7 @@ class _ScanMealPageState extends ConsumerState<ScanMealPage> {
         // Detected food items list
         Text(
           "Detected Ingredients",
-          style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+          style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16),
         ),
         const SizedBox(height: 12),
         ListView.separated(
@@ -480,9 +448,9 @@ class _ScanMealPageState extends ConsumerState<ScanMealPage> {
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: AppColors.darkSurface,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.darkBorder),
+                border: Border.all(color: Theme.of(context).dividerColor),
               ),
               child: Row(
                 children: [
@@ -492,18 +460,18 @@ class _ScanMealPageState extends ConsumerState<ScanMealPage> {
                       children: [
                         Text(
                           item['name'] ?? 'Ingredient',
-                          style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
+                          style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
                         ),
                         Text(
                           "${itemWeight.round()}g portion",
-                          style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 12),
+                          style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 12),
                         ),
                       ],
                     ),
                   ),
                   Text(
                     "${itemCal.round()} kcal",
-                    style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
+                    style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -525,11 +493,11 @@ class _ScanMealPageState extends ConsumerState<ScanMealPage> {
         const SizedBox(height: 4),
         Text(
           "${amount.round()}g",
-          style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+          style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16),
         ),
         Text(
           label,
-          style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 11),
+          style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 11),
         ),
       ],
     );

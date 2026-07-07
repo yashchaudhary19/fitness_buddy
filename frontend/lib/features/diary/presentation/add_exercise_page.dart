@@ -108,7 +108,7 @@ class _AddExercisePageState extends ConsumerState<AddExercisePage> {
             backgroundColor: AppColors.accent,
             content: Text(
               "Logged exercise: ${_nameController.text}!",
-              style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
+              style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
             ),
           ),
         );
@@ -132,7 +132,7 @@ class _AddExercisePageState extends ConsumerState<AddExercisePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(LucideIcons.arrowLeft, color: Colors.white),
@@ -154,7 +154,7 @@ class _AddExercisePageState extends ConsumerState<AddExercisePage> {
                 // Quick presets horizontal scroller
                 Text(
                   "Popular Workouts",
-                  style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                  style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 const SizedBox(height: 12),
                 _buildPresetsList(),
@@ -164,9 +164,9 @@ class _AddExercisePageState extends ConsumerState<AddExercisePage> {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: AppColors.darkSurface,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.darkBorder),
+                    border: Border.all(color: Theme.of(context).dividerColor),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,12 +174,12 @@ class _AddExercisePageState extends ConsumerState<AddExercisePage> {
                       // Workout name field
                       Text(
                         "Exercise Name",
-                        style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                        style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 14),
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _nameController,
-                        style: const TextStyle(color: Colors.white),
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                         validator: (value) => value == null || value.trim().isEmpty ? "Name is required" : null,
                         decoration: const InputDecoration(
                           hintText: "E.g. Running, Pushups...",
@@ -192,7 +192,7 @@ class _AddExercisePageState extends ConsumerState<AddExercisePage> {
                         children: [
                           Expanded(
                             child: RadioListTile<String>(
-                              title: Text("Cardio", style: GoogleFonts.outfit(color: Colors.white, fontSize: 14)),
+                              title: Text("Cardio", style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontSize: 14)),
                               value: 'cardio',
                               groupValue: _exerciseType,
                               activeColor: AppColors.accent,
@@ -202,7 +202,7 @@ class _AddExercisePageState extends ConsumerState<AddExercisePage> {
                           ),
                           Expanded(
                             child: RadioListTile<String>(
-                              title: Text("Strength", style: GoogleFonts.outfit(color: Colors.white, fontSize: 14)),
+                              title: Text("Strength", style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontSize: 14)),
                               value: 'strength',
                               groupValue: _exerciseType,
                               activeColor: AppColors.accent,
@@ -220,7 +220,7 @@ class _AddExercisePageState extends ConsumerState<AddExercisePage> {
                         children: [
                           Text(
                             "Duration",
-                            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                            style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 14),
                           ),
                           Text(
                             "${_durationMinutes.round()} minutes",
@@ -234,7 +234,7 @@ class _AddExercisePageState extends ConsumerState<AddExercisePage> {
                         max: 120,
                         divisions: 23,
                         activeColor: AppColors.accent,
-                        inactiveColor: AppColors.darkBorder,
+                        inactiveColor: Theme.of(context).dividerColor,
                         onChanged: _onDurationChanged,
                       ),
                       const SizedBox(height: 12),
@@ -242,13 +242,13 @@ class _AddExercisePageState extends ConsumerState<AddExercisePage> {
                       // Calories burned estimation input
                       Text(
                         "Calories Burned (kcal)",
-                        style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                        style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 14),
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _caloriesController,
                         keyboardType: TextInputType.number,
-                        style: const TextStyle(color: Colors.white),
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                         validator: (value) => value == null || value.trim().isEmpty ? "Calories are required" : null,
                         decoration: const InputDecoration(
                           hintText: "E.g. 250",
@@ -303,10 +303,10 @@ class _AddExercisePageState extends ConsumerState<AddExercisePage> {
               width: 120,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.accent.withOpacity(0.12) : AppColors.darkSurface,
+                color: isSelected ? AppColors.accent.withOpacity(0.12) : Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: isSelected ? AppColors.accent : AppColors.darkBorder,
+                  color: isSelected ? AppColors.accent : Theme.of(context).dividerColor,
                   width: 1.5,
                 ),
               ),
@@ -315,14 +315,14 @@ class _AddExercisePageState extends ConsumerState<AddExercisePage> {
                 children: [
                   Icon(
                     preset['icon'] as IconData,
-                    color: isSelected ? AppColors.accent : Colors.white.withOpacity(0.6),
+                    color: isSelected ? AppColors.accent : Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6) ?? Colors.grey,
                     size: 24,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     preset['name'] as String,
                     style: GoogleFonts.outfit(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 10.5,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     ),

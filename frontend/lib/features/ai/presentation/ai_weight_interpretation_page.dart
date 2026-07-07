@@ -21,7 +21,7 @@ class _AiWeightInterpretationPageState extends ConsumerState<AiWeightInterpretat
     final interpretationFuture = ref.watch(aiWeightInterpretationProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           "Weight Trend Analysis",
@@ -29,7 +29,7 @@ class _AiWeightInterpretationPageState extends ConsumerState<AiWeightInterpretat
         ),
         actions: [
           IconButton(
-            icon: const Icon(LucideIcons.rotateCcw, size: 20, color: AppColors.darkTextSecondary),
+            icon: Icon(LucideIcons.rotateCcw, size: 20, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70),
             onPressed: () {
               ref.invalidate(aiWeightInterpretationProvider);
             },
@@ -48,20 +48,20 @@ class _AiWeightInterpretationPageState extends ConsumerState<AiWeightInterpretat
                 AdService.showRewardedOncePerDay('weight_trend');
               });
             }
-            return _buildContent(context, ref, data);
+            return _buildContent(ref, data);
           },
           loading: () => const Center(
             child: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
             ),
           ),
-          error: (err, stack) => _buildErrorState(context, ref, err),
+          error: (err, stack) => _buildErrorState(ref, err),
         ),
       ),
     );
   }
 
-  Widget _buildContent(BuildContext context, WidgetRef ref, WeightInterpretation data) {
+  Widget _buildContent(WidgetRef ref, WeightInterpretation data) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -96,7 +96,7 @@ class _AiWeightInterpretationPageState extends ConsumerState<AiWeightInterpretat
           Text(
             "AI-generated analysis of your logged weights",
             style: GoogleFonts.outfit(
-              color: AppColors.darkTextSecondary,
+              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70,
               fontSize: 13,
             ),
           ),
@@ -124,7 +124,7 @@ class _AiWeightInterpretationPageState extends ConsumerState<AiWeightInterpretat
             "Note: Weight trends are calculated using linear regression on your logging entries. Keep logging weights consistently for maximum accuracy.",
             textAlign: TextAlign.center,
             style: GoogleFonts.outfit(
-              color: AppColors.darkTextSecondary.withOpacity(0.6),
+              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70.withOpacity(0.6),
               fontSize: 11,
               height: 1.4,
             ),
@@ -143,9 +143,9 @@ class _AiWeightInterpretationPageState extends ConsumerState<AiWeightInterpretat
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.darkSurface.withOpacity(0.5),
+        color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.darkBorder.withOpacity(0.4), width: 1.5),
+        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.4), width: 1.5),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -170,11 +170,11 @@ class _AiWeightInterpretationPageState extends ConsumerState<AiWeightInterpretat
                 ),
               ],
             ),
-            const Divider(color: AppColors.darkBorder, height: 24, thickness: 1),
+            Divider(color: Theme.of(context).dividerColor, height: 24, thickness: 1),
             Text(
               content,
               style: GoogleFonts.outfit(
-                color: AppColors.darkTextPrimary,
+                color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
                 fontSize: 13.5,
                 height: 1.5,
               ),
@@ -185,7 +185,7 @@ class _AiWeightInterpretationPageState extends ConsumerState<AiWeightInterpretat
     );
   }
 
-  Widget _buildErrorState(BuildContext context, WidgetRef ref, Object err) {
+  Widget _buildErrorState(WidgetRef ref, Object err) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -196,13 +196,13 @@ class _AiWeightInterpretationPageState extends ConsumerState<AiWeightInterpretat
             const SizedBox(height: 12),
             Text(
               "Could not analyze weight trend",
-              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: Theme.of(context).colorScheme.onSurface),
             ),
             const SizedBox(height: 6),
             Text(
               "Ensure you have set weight goals in your profile and logged weight entries.",
               textAlign: TextAlign.center,
-              style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 13),
+              style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 13),
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(

@@ -60,7 +60,7 @@ class AppTheme {
           titleMedium: TextStyle(color: AppColors.darkTextPrimary, fontWeight: FontWeight.w600, fontSize: 18),
           bodyLarge: TextStyle(color: AppColors.darkTextPrimary, fontSize: 16),
           bodyMedium: TextStyle(color: AppColors.darkTextSecondary, fontSize: 14),
-          labelLarge: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          labelLarge: const TextStyle(color: AppColors.darkTextPrimary, fontWeight: FontWeight.bold),
         ),
       ),
 
@@ -159,7 +159,7 @@ class AppTheme {
           titleMedium: TextStyle(color: AppColors.lightTextPrimary, fontWeight: FontWeight.w600, fontSize: 18),
           bodyLarge: TextStyle(color: AppColors.lightTextPrimary, fontSize: 16),
           bodyMedium: TextStyle(color: AppColors.lightTextSecondary, fontSize: 14),
-          labelLarge: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          labelLarge: const TextStyle(color: AppColors.lightTextPrimary, fontWeight: FontWeight.bold),
         ),
       ),
 

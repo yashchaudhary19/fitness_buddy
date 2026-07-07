@@ -78,10 +78,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft, color: Colors.white),
+          icon: Icon(LucideIcons.arrowLeft, color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => context.pop(),
         ),
       ),
@@ -114,7 +114,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     style: GoogleFonts.outfit(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -124,7 +124,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     "Join NutriVault and start tracking today",
                     style: GoogleFonts.outfit(
                       fontSize: 16,
-                      color: AppColors.darkTextSecondary,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70,
                     ),
                   ),
                 ),
@@ -159,7 +159,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 Text(
                   "Full Name",
                   style: GoogleFonts.outfit(
-                    color: AppColors.darkTextPrimary,
+                    color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                   ),
@@ -168,10 +168,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 TextFormField(
                   controller: _nameController,
                   keyboardType: TextInputType.name,
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                   enabled: !_isLoading,
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(LucideIcons.user, color: AppColors.darkTextSecondary),
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(LucideIcons.user, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70),
                     hintText: "Enter your full name",
                   ),
                   validator: (value) {
@@ -187,7 +187,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 Text(
                   "Email Address",
                   style: GoogleFonts.outfit(
-                    color: AppColors.darkTextPrimary,
+                    color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                   ),
@@ -196,10 +196,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                   enabled: !_isLoading,
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(LucideIcons.mail, color: AppColors.darkTextSecondary),
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(LucideIcons.mail, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70),
                     hintText: "Enter your email",
                   ),
                   validator: (value) {
@@ -218,7 +218,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 Text(
                   "Password",
                   style: GoogleFonts.outfit(
-                    color: AppColors.darkTextPrimary,
+                    color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                   ),
@@ -227,15 +227,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                   enabled: !_isLoading,
                   decoration: InputDecoration(
-                    prefixIcon: const Icon(LucideIcons.key, color: AppColors.darkTextSecondary),
+                    prefixIcon: Icon(LucideIcons.key, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70),
                     hintText: "Create a password",
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword ? LucideIcons.eyeOff : LucideIcons.eye,
-                        color: AppColors.darkTextSecondary,
+                        color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70,
                       ),
                       onPressed: () {
                         setState(() {
@@ -260,7 +260,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 Text(
                   "Confirm Password",
                   style: GoogleFonts.outfit(
-                    color: AppColors.darkTextPrimary,
+                    color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                   ),
@@ -269,10 +269,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: _obscurePassword,
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                   enabled: !_isLoading,
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(LucideIcons.shieldAlert, color: AppColors.darkTextSecondary),
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(LucideIcons.shieldAlert, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70),
                     hintText: "Confirm your password",
                   ),
                   validator: (value) {
@@ -320,19 +320,19 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 // OR Divider
                 Row(
                   children: [
-                    Expanded(child: Divider(color: Colors.white.withOpacity(0.15), thickness: 1)),
+                    Expanded(child: Divider(color: Theme.of(context).dividerColor, thickness: 1)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
                         "OR",
                         style: GoogleFonts.outfit(
-                          color: AppColors.darkTextSecondary,
+                          color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
-                    Expanded(child: Divider(color: Colors.white.withOpacity(0.15), thickness: 1)),
+                    Expanded(child: Divider(color: Theme.of(context).dividerColor, thickness: 1)),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -382,7 +382,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   children: [
                     Text(
                       "Already have an account?",
-                      style: GoogleFonts.outfit(color: AppColors.darkTextSecondary),
+                      style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70),
                     ),
                     TextButton(
                       onPressed: _isLoading

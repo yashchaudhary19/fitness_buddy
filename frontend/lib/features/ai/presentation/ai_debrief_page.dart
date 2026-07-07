@@ -34,7 +34,7 @@ class _AiDebriefPageState extends ConsumerState<AiDebriefPage> {
     final debriefFuture = ref.watch(aiDebriefProvider(_dateStr));
 
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           "Nutrition Debrief",
@@ -81,9 +81,9 @@ class _AiDebriefPageState extends ConsumerState<AiDebriefPage> {
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.darkSurface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.darkBorder.withOpacity(0.4), width: 1),
+        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.4), width: 1),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -128,7 +128,7 @@ class _AiDebriefPageState extends ConsumerState<AiDebriefPage> {
           Text(
             "Coach Summary",
             style: GoogleFonts.outfit(
-              color: AppColors.darkTextPrimary,
+              color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
               fontWeight: FontWeight.bold,
               fontSize: 16,
             ),
@@ -137,9 +137,9 @@ class _AiDebriefPageState extends ConsumerState<AiDebriefPage> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppColors.darkSurface.withOpacity(0.5),
+              color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.darkBorder.withOpacity(0.4), width: 1.5),
+              border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.4), width: 1.5),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,7 +154,7 @@ class _AiDebriefPageState extends ConsumerState<AiDebriefPage> {
                   child: Text(
                     debrief.summary,
                     style: GoogleFonts.outfit(
-                      color: AppColors.darkTextPrimary,
+                      color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
                       fontSize: 14,
                       height: 1.5,
                       fontStyle: FontStyle.italic,
@@ -170,7 +170,7 @@ class _AiDebriefPageState extends ConsumerState<AiDebriefPage> {
           Text(
             "Nutritional Deficits Flagged",
             style: GoogleFonts.outfit(
-              color: AppColors.darkTextPrimary,
+              color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
               fontWeight: FontWeight.bold,
               fontSize: 16,
             ),
@@ -183,7 +183,7 @@ class _AiDebriefPageState extends ConsumerState<AiDebriefPage> {
           Text(
             "Tweaks for Tomorrow",
             style: GoogleFonts.outfit(
-              color: AppColors.darkTextPrimary,
+              color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
               fontWeight: FontWeight.bold,
               fontSize: 16,
             ),
@@ -192,7 +192,7 @@ class _AiDebriefPageState extends ConsumerState<AiDebriefPage> {
           Text(
             "Commit to these changes to keep moving closer to your targets:",
             style: GoogleFonts.outfit(
-              color: AppColors.darkTextSecondary,
+              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70,
               fontSize: 12,
             ),
           ),
@@ -200,7 +200,7 @@ class _AiDebriefPageState extends ConsumerState<AiDebriefPage> {
           if (debrief.tweaks.isEmpty)
             Text(
               "No suggestions. Great job keeping your targets!",
-              style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 13),
+              style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 13),
             )
           else
             ...debrief.tweaks.map((tweak) => _buildTweakCheckbox(tweak)),
@@ -250,10 +250,10 @@ class _AiDebriefPageState extends ConsumerState<AiDebriefPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: AppColors.darkSurface.withOpacity(0.4),
+        color: Theme.of(context).colorScheme.surface.withOpacity(0.4),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isChecked ? AppColors.primary.withOpacity(0.4) : AppColors.darkBorder.withOpacity(0.3),
+          color: isChecked ? AppColors.primary.withOpacity(0.4) : Theme.of(context).dividerColor.withOpacity(0.3),
           width: 1.5,
         ),
       ),
@@ -261,7 +261,7 @@ class _AiDebriefPageState extends ConsumerState<AiDebriefPage> {
         title: Text(
           tweak,
           style: GoogleFonts.outfit(
-            color: isChecked ? AppColors.darkTextPrimary : AppColors.darkTextSecondary,
+            color: isChecked ? Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70,
             fontSize: 13,
             decoration: isChecked ? TextDecoration.lineThrough : null,
           ),
@@ -290,7 +290,7 @@ class _AiDebriefPageState extends ConsumerState<AiDebriefPage> {
             const SizedBox(height: 12),
             Text(
               "Could not analyze nutrition logs",
-              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: Theme.of(context).colorScheme.onSurface),
             ),
             const SizedBox(height: 6),
             Text(
@@ -298,7 +298,7 @@ class _AiDebriefPageState extends ConsumerState<AiDebriefPage> {
                   ? "Ensure you have logged some food items for this date."
                   : "Please check your network and make sure the server is online.",
               textAlign: TextAlign.center,
-              style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 13),
+              style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 13),
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(

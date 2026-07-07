@@ -10,6 +10,7 @@ import 'package:frontend/features/dashboard/providers/summary_provider.dart';
 import 'package:frontend/features/diary/providers/diary_provider.dart';
 import 'package:frontend/core/ads/ad_banner_widget.dart';
 import 'package:frontend/core/ads/diary_native_ad_widget.dart';
+import 'package:frontend/shared/widgets/premium_error_view.dart';
 
 class DiaryPage extends ConsumerWidget {
   const DiaryPage({super.key});
@@ -21,7 +22,7 @@ class DiaryPage extends ConsumerWidget {
     final summaryState = ref.watch(summaryProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           "Nutrition Diary",
@@ -91,7 +92,7 @@ class DiaryPage extends ConsumerWidget {
   Widget _buildDateBanner(BuildContext context, DateTime selectedDate) {
     return Container(
       width: double.infinity,
-      color: AppColors.darkSurface,
+      color: Theme.of(context).colorScheme.surface,
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
       child: Center(
         child: Text(
@@ -114,11 +115,11 @@ class DiaryPage extends ConsumerWidget {
     DiaryNotifier notifier,
   ) {
     return Material(
-      color: AppColors.darkSurface,
+      color: Theme.of(context).colorScheme.surface,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: AppColors.darkBorder),
+        side: BorderSide(color: Theme.of(context).dividerColor),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -130,7 +131,7 @@ class DiaryPage extends ConsumerWidget {
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                  style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 18),
                 ),
                 const Spacer(),
                 Text(
@@ -140,7 +141,7 @@ class DiaryPage extends ConsumerWidget {
               ],
             ),
             children: [
-              const Divider(color: AppColors.darkBorder, height: 1),
+              Divider(color: Theme.of(context).dividerColor, height: 1),
               
               // List of entries
               if (data.entries.isEmpty)
@@ -149,7 +150,7 @@ class DiaryPage extends ConsumerWidget {
                   child: Center(
                     child: Text(
                       "No items logged yet",
-                      style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 14),
+                      style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 14),
                     ),
                   ),
                 )
@@ -158,14 +159,14 @@ class DiaryPage extends ConsumerWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: data.entries.length,
-                  separatorBuilder: (context, index) => const Divider(color: AppColors.darkBorder, height: 1),
+                  separatorBuilder: (context, index) => Divider(color: Theme.of(context).dividerColor, height: 1),
                   itemBuilder: (context, index) {
                     final entry = data.entries[index];
-                    return _buildFoodDismissibleRow(entry, notifier);
+                    return _buildFoodDismissibleRow(context, entry, notifier);
                   },
                 ),
 
-              const Divider(color: AppColors.darkBorder, height: 1),
+              Divider(color: Theme.of(context).dividerColor, height: 1),
               
               // Add Food Button
               Padding(
@@ -196,7 +197,7 @@ class DiaryPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildFoodDismissibleRow(DiaryFoodEntry entry, DiaryNotifier notifier) {
+  Widget _buildFoodDismissibleRow(BuildContext context, DiaryFoodEntry entry, DiaryNotifier notifier) {
     return Dismissible(
       key: ValueKey("food_${entry.id}"),
       direction: DismissDirection.endToStart,
@@ -217,19 +218,19 @@ class DiaryPage extends ConsumerWidget {
                 children: [
                   Text(
                     entry.foodName,
-                    style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                    style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 15),
                   ),
                   if (entry.brandName != null && entry.brandName!.isNotEmpty)
                     Text(
                       entry.brandName!,
-                      style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 12),
+                      style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 12),
                     ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       Text(
                         "${entry.servingSizeG.round()}g",
-                        style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 13),
+                        style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 13),
                       ),
                       const SizedBox(width: 8),
                       _buildMacroBadge("C:${entry.carbsG.round()}g", AppColors.secondary),
@@ -245,7 +246,7 @@ class DiaryPage extends ConsumerWidget {
             const SizedBox(width: 12),
             Text(
               "${entry.calories.round()} kcal",
-              style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+              style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 15),
             ),
           ],
         ),
@@ -260,11 +261,11 @@ class DiaryPage extends ConsumerWidget {
     DiaryNotifier notifier,
   ) {
     return Material(
-      color: AppColors.darkSurface,
+      color: Theme.of(context).colorScheme.surface,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: AppColors.darkBorder),
+        side: BorderSide(color: Theme.of(context).dividerColor),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -278,7 +279,7 @@ class DiaryPage extends ConsumerWidget {
                 const SizedBox(width: 10),
                 Text(
                   "Exercise & Cardio",
-                  style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                  style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 18),
                 ),
                 const Spacer(),
                 Text(
@@ -288,7 +289,7 @@ class DiaryPage extends ConsumerWidget {
               ],
             ),
             children: [
-              const Divider(color: AppColors.darkBorder, height: 1),
+              Divider(color: Theme.of(context).dividerColor, height: 1),
               
               if (exercises.isEmpty)
                 Padding(
@@ -296,7 +297,7 @@ class DiaryPage extends ConsumerWidget {
                   child: Center(
                     child: Text(
                       "No exercises logged today",
-                      style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 14),
+                      style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 14),
                     ),
                   ),
                 )
@@ -305,7 +306,7 @@ class DiaryPage extends ConsumerWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: exercises.length,
-                  separatorBuilder: (context, index) => const Divider(color: AppColors.darkBorder, height: 1),
+                  separatorBuilder: (context, index) => Divider(color: Theme.of(context).dividerColor, height: 1),
                   itemBuilder: (context, index) {
                     final exercise = exercises[index];
                     return Dismissible(
@@ -328,11 +329,11 @@ class DiaryPage extends ConsumerWidget {
                                 children: [
                                   Text(
                                     exercise.name,
-                                    style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                                    style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 15),
                                   ),
                                   Text(
                                     "${exercise.durationMinutes.round()} mins | ${exercise.type.toUpperCase()}",
-                                    style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 13),
+                                    style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 13),
                                   ),
                                 ],
                               ),
@@ -349,7 +350,7 @@ class DiaryPage extends ConsumerWidget {
                   },
                 ),
 
-              const Divider(color: AppColors.darkBorder, height: 1),
+              Divider(color: Theme.of(context).dividerColor, height: 1),
               
               // Add Exercise Button
               Padding(
@@ -399,32 +400,10 @@ class DiaryPage extends ConsumerWidget {
   }
 
   Widget _buildErrorView(String error, DateTime date, DiaryNotifier notifier) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(LucideIcons.alertTriangle, color: AppColors.error, size: 48),
-            const SizedBox(height: 16),
-            Text(
-              "Could not load diary details",
-              style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              error,
-              style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 14),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () => notifier.fetchDiaryDetails(date),
-              child: const Text("Retry"),
-            ),
-          ],
-        ),
-      ),
+    return PremiumErrorView(
+      errorMessage: error,
+      onRetry: () => notifier.fetchDiaryDetails(date),
+      title: "Could not load diary details",
     );
   }
 }

@@ -143,7 +143,7 @@ class SummaryNotifier extends StateNotifier<SummaryState> {
 
   String get _formattedDate => DateFormat('yyyy-MM-dd').format(state.selectedDate);
 
-  Future<void> fetchSummary() async {
+  Future<void> fetchSummary({bool isRetry = false}) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final response = await _apiService.get(
@@ -165,19 +165,29 @@ class SummaryNotifier extends StateNotifier<SummaryState> {
         );
       }
     } catch (e) {
-      if (mounted) {
-        final errorStr = e.toString();
-        String displayError = errorStr.replaceAll("ApiException: ", "");
-        
-        if (errorStr.contains("Connection refused") || errorStr.contains("SocketException")) {
-          displayError = "Connection failed. Please check your internet connection.";
-        }
-
-        state = state.copyWith(
-          isLoading: false,
-          errorMessage: displayError,
-        );
+      if (!mounted) return;
+      
+      final isTransient = e is ApiException && (e.statusCode == 502 || e.statusCode == 503);
+      
+      // Auto-retry once after 3 seconds for transient server errors (DB reconnecting)
+      if (isTransient && !isRetry) {
+        if (kDebugMode) print("Transient server error (${(e as ApiException).statusCode}), auto-retrying in 3s...");
+        await Future.delayed(const Duration(seconds: 3));
+        if (mounted) fetchSummary(isRetry: true);
+        return;
       }
+      
+      final errorStr = e.toString();
+      String displayError = errorStr.replaceAll("ApiException: ", "");
+      
+      if (errorStr.contains("Connection refused") || errorStr.contains("SocketException")) {
+        displayError = "Connection failed. Please check your internet connection.";
+      }
+
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: displayError,
+      );
     }
   }
 

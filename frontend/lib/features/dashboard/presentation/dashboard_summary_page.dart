@@ -10,6 +10,7 @@ import 'package:frontend/core/ads/ad_service.dart';
 import 'package:frontend/core/theme/app_theme.dart';
 import 'package:frontend/features/dashboard/providers/summary_provider.dart';
 import 'package:frontend/features/auth/providers/auth_provider.dart';
+import 'package:frontend/shared/widgets/premium_error_view.dart';
 
 class DashboardSummaryPage extends ConsumerStatefulWidget {
   const DashboardSummaryPage({super.key});
@@ -77,7 +78,7 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
     final userInitial = userName.trim().isNotEmpty ? userName.trim()[0].toUpperCase() : 'Y';
 
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(120),
         child: SafeArea(
@@ -199,7 +200,7 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
                                 const SizedBox(height: 24),
 
                                 // Hydration tracking card
-                                _buildWaterCard(context, state.summary!, notifier),
+                                _buildWaterCard(state.summary!, notifier),
                                 const SizedBox(height: 24),
 
                                 // Workouts/Exercise tracking card
@@ -227,15 +228,15 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       padding: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.darkSurface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.darkBorder),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            icon: const Icon(LucideIcons.chevronLeft, color: Colors.white),
+            icon: Icon(LucideIcons.chevronLeft, color: Theme.of(context).colorScheme.onSurface),
             onPressed: () => notifier.incrementDate(-1),
           ),
           GestureDetector(
@@ -257,7 +258,7 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
                 Text(
                   dateHeader,
                   style: GoogleFonts.outfit(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -266,7 +267,7 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
             ),
           ),
           IconButton(
-            icon: const Icon(LucideIcons.chevronRight, color: Colors.white),
+            icon: Icon(LucideIcons.chevronRight, color: Theme.of(context).colorScheme.onSurface),
             onPressed: () => notifier.incrementDate(1),
           ),
         ],
@@ -282,9 +283,9 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.darkSurface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.darkBorder),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: Row(
         children: [
@@ -299,7 +300,7 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
                   value: percent,
                   strokeWidth: 10,
                   color: AppColors.primary,
-                  backgroundColor: AppColors.darkBorder,
+                  backgroundColor: Theme.of(context).dividerColor,
                   strokeCap: StrokeCap.round,
                 ),
               ),
@@ -311,14 +312,14 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
                     style: GoogleFonts.outfit(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   Text(
                     "Remaining",
                     style: GoogleFonts.outfit(
                       fontSize: 12,
-                      color: AppColors.darkTextSecondary,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70,
                     ),
                   ),
                 ],
@@ -332,7 +333,7 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildCalorieStatRow(LucideIcons.target, "Goal", summary.caloriesGoal.round().toString(), Colors.white),
+                _buildCalorieStatRow(LucideIcons.target, "Goal", summary.caloriesGoal.round().toString(), Theme.of(context).colorScheme.onSurface),
                 const SizedBox(height: 12),
                 _buildCalorieStatRow(LucideIcons.apple, "Food", summary.caloriesConsumed.round().toString(), AppColors.primary),
                 const SizedBox(height: 12),
@@ -352,12 +353,12 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
         const SizedBox(width: 10),
         Text(
           label,
-          style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 14),
+          style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 14),
         ),
         const Spacer(),
         Text(
           value,
-          style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+          style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16),
         ),
       ],
     );
@@ -367,16 +368,16 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.darkSurface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.darkBorder),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             "Macronutrients",
-            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+            style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16),
           ),
           const SizedBox(height: 20),
           
@@ -437,10 +438,10 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label, style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 13)),
+            Text(label, style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 13)),
             Text(
               "${consumed.round()} / ${goal.round()} $unit",
-              style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+              style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 13),
             ),
           ],
         ),
@@ -451,14 +452,14 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
             value: fraction,
             minHeight: 8,
             color: color,
-            backgroundColor: AppColors.darkBorder,
+            backgroundColor: Theme.of(context).dividerColor,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildWaterCard(BuildContext context, DiarySummary summary, SummaryNotifier notifier) {
+  Widget _buildWaterCard(DiarySummary summary, SummaryNotifier notifier) {
     final double percent = summary.waterGoalMl > 0
         ? (summary.waterConsumedMl / summary.waterGoalMl).clamp(0.0, 1.0)
         : 0.0;
@@ -468,9 +469,9 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AppColors.darkSurface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.darkBorder),
+          border: Border.all(color: Theme.of(context).dividerColor),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -484,13 +485,13 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
                     const SizedBox(width: 10),
                     Text(
                       "Water Hydration",
-                      style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                      style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                   ],
                 ),
                 Text(
                   "${summary.waterConsumedMl.round()} / ${summary.waterGoalMl.round()} ml",
-                  style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                  style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 14),
                 ),
               ],
             ),
@@ -501,7 +502,7 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
                 value: percent,
                 minHeight: 10,
                 color: Colors.blueAccent,
-                backgroundColor: AppColors.darkBorder,
+                backgroundColor: Theme.of(context).dividerColor,
               ),
             ),
             const SizedBox(height: 16),
@@ -534,9 +535,9 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.darkSurface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.darkBorder),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: Row(
         children: [
@@ -555,12 +556,12 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
               children: [
                 Text(
                   "Exercise & Cardio",
-                  style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                  style: GoogleFonts.outfit(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   "Burn extra calories to offset your diet budget.",
-                  style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 13),
+                  style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 13),
                 ),
               ],
             ),
@@ -574,7 +575,7 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
               ),
               Text(
                 "kcal",
-                style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 12),
+                style: GoogleFonts.outfit(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70, fontSize: 12),
               ),
             ],
           ),
@@ -620,7 +621,7 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
             Text(
               "Say goodbye to ads.  ",
               style: GoogleFonts.outfit(
-                color: AppColors.darkTextSecondary,
+                color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70,
                 fontSize: 13,
               ),
             ),
@@ -644,32 +645,10 @@ class _DashboardSummaryPageState extends ConsumerState<DashboardSummaryPage> {
   }
 
   Widget _buildErrorView(String error, SummaryNotifier notifier) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(LucideIcons.alertOctagon, color: AppColors.error, size: 48),
-            const SizedBox(height: 16),
-            Text(
-              "Something went wrong",
-              style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              error,
-              style: GoogleFonts.outfit(color: AppColors.darkTextSecondary, fontSize: 14),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: notifier.fetchSummary,
-              child: const Text("Retry"),
-            ),
-          ],
-        ),
-      ),
+    return PremiumErrorView(
+      errorMessage: error,
+      onRetry: notifier.fetchSummary,
+      title: "Could not load summary",
     );
   }
 }

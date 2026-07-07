@@ -89,9 +89,9 @@ class _ScanBarcodePageState extends ConsumerState<ScanBarcodePage> {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          "Scan Product Barcode",
-          style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
+           "Scan Product Barcode",
+           style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
+         ),
         actions: [
           IconButton(
             icon: Icon(
@@ -189,9 +189,9 @@ class _ScanBarcodePageState extends ConsumerState<ScanBarcodePage> {
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.darkSurface.withOpacity(0.95),
+                color: Theme.of(context).colorScheme.surface.withOpacity(0.95),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.darkBorder),
+                border: Border.all(color: Theme.of(context).dividerColor),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -200,7 +200,7 @@ class _ScanBarcodePageState extends ConsumerState<ScanBarcodePage> {
                   Text(
                     "Or enter barcode manually",
                     style: GoogleFonts.outfit(
-                      color: AppColors.darkTextSecondary,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70,
                       fontSize: 13,
                     ),
                   ),
@@ -211,7 +211,7 @@ class _ScanBarcodePageState extends ConsumerState<ScanBarcodePage> {
                         child: TextField(
                           controller: _manualController,
                           keyboardType: TextInputType.number,
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                           onSubmitted: (_) => _handleManualEntry(),
                           decoration: const InputDecoration(
                             hintText: "e.g. 5449000000996",

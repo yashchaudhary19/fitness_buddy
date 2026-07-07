@@ -20,21 +20,41 @@ class AuthInterceptor extends Interceptor {
 
   @override
   Future<void> onError(DioException err, ErrorInterceptorHandler handler) async {
+    final response = err.response;
+    int? virtualStatusCode = response?.statusCode;
+
+    // Handle cPanel/LiteSpeed 502 proxy wrappers for upstream errors
+    if (response?.statusCode == 502 && response?.data != null) {
+      final dataStr = response?.data.toString() ?? '';
+      if (dataStr.contains('401') || dataStr.contains('Unauthorized')) {
+        virtualStatusCode = 401;
+      } else if (dataStr.contains('404') || dataStr.contains('Not Found')) {
+        virtualStatusCode = 404;
+      }
+    }
+
     // Treat missing user as an auth failure and force logout
-    if (err.response?.statusCode == 404) {
-      final data = err.response?.data;
+    if (virtualStatusCode == 404) {
+      final data = response?.data;
+      bool isUserNotFound = false;
       if (data is Map<String, dynamic>) {
         final detail = data['detail']?.toString();
         if (detail == "User associated with token not found.") {
-          await TokenStorage.clear();
-          onAuthFailure();
-          return handler.reject(err);
+          isUserNotFound = true;
         }
+      } else if (data != null && data.toString().contains("User associated with token not found")) {
+        isUserNotFound = true;
+      }
+
+      if (isUserNotFound) {
+        await TokenStorage.clear();
+        onAuthFailure();
+        return handler.reject(err);
       }
     }
 
     // If unauthorized, attempt token refresh
-    if (err.response?.statusCode == 401) {
+    if (virtualStatusCode == 401) {
       final refreshToken = TokenStorage.refreshToken;
       
       // If no refresh token exists, propagate error and logout
@@ -78,7 +98,16 @@ class AuthInterceptor extends Interceptor {
           options.headers['Authorization'] = 'Bearer $newAccessToken';
 
           // Retry the request using a new custom Dio instance to avoid infinite loop checks
-          final retryDio = Dio(BaseOptions(baseUrl: ApiConstants.baseUrl));
+          final retryDio = Dio(BaseOptions(
+            baseUrl: ApiConstants.baseUrl,
+            connectTimeout: const Duration(seconds: 60),
+            receiveTimeout: const Duration(seconds: 60),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Bypass-Tunnel-Reminder': 'true',
+            },
+          ));
           try {
             final retryResponse = await retryDio.request(
               options.path,

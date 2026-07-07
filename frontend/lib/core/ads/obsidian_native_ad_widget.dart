@@ -12,7 +12,7 @@ class ObsidianNativeAdWidget extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.darkSurface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: AppColors.primary.withOpacity(0.15),
@@ -48,7 +48,7 @@ class ObsidianNativeAdWidget extends StatelessWidget {
               Icon(
                 Icons.info_outline,
                 size: 14,
-                color: AppColors.darkTextSecondary.withOpacity(0.6),
+                color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70.withOpacity(0.6),
               ),
             ],
           ),
@@ -60,9 +60,9 @@ class ObsidianNativeAdWidget extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: AppColors.darkBackground,
+                  color: Theme.of(context).scaffoldBackgroundColor,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppColors.darkBorder),
+                  border: Border.all(color: Theme.of(context).dividerColor),
                 ),
                 child: const Center(
                   child: Icon(
@@ -91,7 +91,7 @@ class ObsidianNativeAdWidget extends StatelessWidget {
                     Text(
                       "Support muscle recovery with 24g of premium whey protein isolate per serving.",
                       style: GoogleFonts.outfit(
-                        color: AppColors.darkTextSecondary,
+                        color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70,
                         fontSize: 12,
                       ),
                       maxLines: 2,

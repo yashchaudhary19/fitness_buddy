@@ -14,7 +14,8 @@ async def init_redis() -> aioredis.Redis:
         redis_client = aioredis.from_url(
             settings.REDIS_URL,
             decode_responses=True,
-            socket_timeout=5.0
+            socket_timeout=5.0,
+            socket_connect_timeout=5.0
         )
         await redis_client.ping()
         logger.info("Successfully connected to Redis.")
@@ -39,8 +40,10 @@ def get_redis() -> aioredis.Redis:
             redis_client = aioredis.from_url(
                 settings.REDIS_URL,
                 decode_responses=True,
-                socket_timeout=5.0
+                socket_timeout=5.0,
+                socket_connect_timeout=5.0
             )
         except Exception as e:
             logger.error(f"Lazy Redis connection failed: {e}")
     return redis_client
+

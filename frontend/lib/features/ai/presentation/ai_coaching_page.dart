@@ -13,7 +13,7 @@ class AiCoachingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           "AI COACHING",
@@ -33,13 +33,13 @@ class AiCoachingPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Welcome Banner
-              _buildWelcomeBanner(),
+              _buildWelcomeBanner(context),
               const SizedBox(height: 28),
 
               Text(
                 "Coaching Services",
                 style: GoogleFonts.outfit(
-                  color: AppColors.darkTextPrimary,
+                  color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
                 ),
@@ -103,7 +103,7 @@ class AiCoachingPage extends StatelessWidget {
     );
   }
 
-  Widget _buildWelcomeBanner() {
+  Widget _buildWelcomeBanner(BuildContext context) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -117,7 +117,7 @@ class AiCoachingPage extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: AppColors.darkBorder.withOpacity(0.5),
+          color: Theme.of(context).dividerColor.withOpacity(0.5),
           width: 1.5,
         ),
       ),
@@ -136,7 +136,7 @@ class AiCoachingPage extends StatelessWidget {
                       Text(
                         "Fitness Buddy",
                         style: GoogleFonts.outfit(
-                          color: AppColors.darkTextPrimary,
+                          color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
                           fontWeight: FontWeight.w900,
                           fontSize: 22,
                         ),
@@ -145,7 +145,7 @@ class AiCoachingPage extends StatelessWidget {
                       Text(
                         "Your personalized AI fitness and nutrition guide.",
                         style: GoogleFonts.outfit(
-                          color: AppColors.darkTextSecondary,
+                          color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70,
                           fontSize: 13,
                           height: 1.4,
                         ),
@@ -190,9 +190,9 @@ class AiCoachingPage extends StatelessWidget {
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: AppColors.darkSurface.withOpacity(0.6),
+          color: Theme.of(context).colorScheme.surface.withOpacity(0.6),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.darkBorder.withOpacity(0.4), width: 1.5),
+          border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.4), width: 1.5),
         ),
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -219,7 +219,7 @@ class AiCoachingPage extends StatelessWidget {
                     child: Text(
                       title,
                       style: GoogleFonts.outfit(
-                        color: AppColors.darkTextPrimary,
+                        color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
@@ -248,7 +248,7 @@ class AiCoachingPage extends StatelessWidget {
               Text(
                 description,
                 style: GoogleFonts.outfit(
-                  color: AppColors.darkTextSecondary,
+                  color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white70,
                   fontSize: 13,
                   height: 1.4,
                 ),

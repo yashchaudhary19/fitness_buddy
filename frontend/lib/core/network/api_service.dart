@@ -95,20 +95,62 @@ class ApiService {
   ApiException _handleDioError(DioException e) {
     final response = e.response;
     if (response != null) {
-      try {
-        final data = response.data;
-        if (data is Map<String, dynamic>) {
-          final errorMsg = data['detail'] ?? data['error'] ?? data['message'] ?? e.message;
-          return ApiException(
-            _sanitizeErrorMessage(errorMsg.toString(), statusCode: response.statusCode),
-            statusCode: response.statusCode,
-            errorCode: data['error'],
-          );
+      int statusCode = response.statusCode ?? 500;
+      dynamic rawData = response.data;
+      String? errorCode;
+      String errorMessage = "An unexpected error occurred. Please try again.";
+
+      // Handle 503 Service Unavailable (DB temporarily down)
+      if (statusCode == 503) {
+        String detail = "The service is temporarily unavailable. Please try again in a moment.";
+        if (rawData is Map<String, dynamic>) {
+          final d = rawData['detail']?.toString();
+          if (d != null && d.isNotEmpty) detail = d;
         }
-      } catch (_) {}
+        return ApiException(detail, statusCode: 503);
+      }
+
+      // Handle cPanel/LiteSpeed 502 proxy wrappers for upstream errors
+      if (statusCode == 502 && rawData != null) {
+        final dataStr = rawData.toString();
+        if (dataStr.contains("401") || dataStr.contains("Unauthorized")) {
+          statusCode = 401;
+          errorMessage = "Your session has expired. Please log in again.";
+        } else if (dataStr.contains("404") || dataStr.contains("Not Found")) {
+          statusCode = 404;
+          errorMessage = "Requested resource not found.";
+        } else if (dataStr.contains("400") || dataStr.contains("Bad Request")) {
+          statusCode = 400;
+          errorMessage = "Invalid request parameters.";
+        } else if (dataStr.contains("422") || dataStr.contains("Unprocessable Entity")) {
+          statusCode = 422;
+          errorMessage = "Validation error occurred.";
+        } else if (dataStr.contains("500") || dataStr.contains("Internal Server Error")) {
+          statusCode = 500;
+          errorMessage = "The server encountered an error. Please try again.";
+        } else if (dataStr.contains("503") || dataStr.contains("Service Unavailable")) {
+          statusCode = 503;
+          errorMessage = "The service is temporarily unavailable. Please try again in a moment.";
+        } else {
+          // Generic 502 — server is restarting or temporarily unavailable
+          errorMessage = "The server is temporarily unavailable. Please wait a moment and try again.";
+        }
+      } else {
+        try {
+          if (rawData is Map<String, dynamic>) {
+            final errorMsg = rawData['detail'] ?? rawData['error'] ?? rawData['message'] ?? e.message;
+            errorMessage = _sanitizeErrorMessage(errorMsg.toString(), statusCode: statusCode);
+            errorCode = rawData['error']?.toString();
+          } else {
+            errorMessage = _sanitizeErrorMessage(e.message ?? errorMessage, statusCode: statusCode);
+          }
+        } catch (_) {}
+      }
+
       return ApiException(
-        "Server returned an error (code ${response.statusCode})",
-        statusCode: response.statusCode,
+        errorMessage,
+        statusCode: statusCode,
+        errorCode: errorCode,
       );
     }
     

@@ -18,7 +18,12 @@ from app.schemas.user import (
     AuthResponse,
     TokenRefreshRequest,
     TokenRefreshResponse,
+    OTPSendRequest,
+    OTPVerifyRequest,
 )
+from app.models.otp import OTPCode
+from app.repositories.otp import OTPCodeRepository
+from app.services.email import send_otp_email
 from app.services.auth import AuthService
 from pydantic import BaseModel
 
@@ -65,6 +70,146 @@ async def login(schema: UserLogin, db: AsyncSession = Depends(get_db)):
             user=UserResponse.model_validate(user)
         ),
         message="Login successful."
+    )
+
+
+@router.post(
+    "/send-otp",
+    response_model=ResponseEnvelope[dict],
+    summary="Send OTP code to email"
+)
+async def send_otp(schema: OTPSendRequest, db: AsyncSession = Depends(get_db)):
+    import secrets
+    from datetime import datetime, timedelta, timezone
+    
+    email = schema.email.strip().lower()
+    
+    # Check if user exists in the database
+    user_repo = UserRepository(db)
+    user = await user_repo.get_by_email(email)
+    
+    if schema.flow == "login" and not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Account does not exist. Please sign up first."
+        )
+    elif schema.flow == "signup" and user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Account already exists. Please log in instead."
+        )
+    
+    # Generate 6-digit numeric OTP
+    otp_code = "".join(secrets.choice("0123456789") for _ in range(6))
+    
+    # Expiration: 5 minutes from now in UTC naive datetime
+    expires_at = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(minutes=5)
+    
+    # Persist the code
+    otp_repo = OTPCodeRepository(db)
+    db_otp = OTPCode(
+        email=email,
+        code=otp_code,
+        expires_at=expires_at,
+        is_used=False
+    )
+    await otp_repo.create(db_otp)
+    await db.commit()
+    
+    # Send email (either real SMTP or simulated log/console)
+    email_sent = await send_otp_email(email, otp_code)
+    
+    if not email_sent:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to send verification code email."
+        )
+        
+    return ResponseEnvelope(
+        success=True,
+        data={},
+        message="Verification code sent to your email."
+    )
+
+
+@router.post(
+    "/verify-otp",
+    response_model=ResponseEnvelope[AuthResponse],
+    summary="Verify OTP code and authenticate user"
+)
+async def verify_otp(schema: OTPVerifyRequest, db: AsyncSession = Depends(get_db)):
+    from app.repositories.user import UserRepository
+    from app.core.security import get_password_hash
+    import secrets
+    
+    email = schema.email.strip().lower()
+    
+    # Check valid OTP
+    otp_repo = OTPCodeRepository(db)
+    valid_otp = await otp_repo.get_valid_otp(email, schema.code)
+    if not valid_otp:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired verification code."
+        )
+        
+    # Mark code as used
+    await otp_repo.update(valid_otp, {"is_used": True})
+    
+    # Look up user or create new
+    user_repo = UserRepository(db)
+    user = await user_repo.get_by_email(email)
+    
+    is_new_user = False
+    if not user:
+        is_new_user = True
+        # For new users, we register them!
+        # Derive name from email prefix or schema.name
+        name = schema.name or email.split("@")[0].capitalize()
+        # Generate random unusable password hash
+        random_pass = secrets.token_hex(32)
+        password_hash = get_password_hash(random_pass)
+        
+        user = User(
+            email=email,
+            password_hash=password_hash,
+            name=name
+        )
+        await user_repo.create(user)
+        await db.flush()
+        
+    # Generate session tokens
+    from app.core.security import create_access_token, create_refresh_token, decode_token
+    from app.models.token import RefreshToken
+    from app.repositories.user import RefreshTokenRepository
+    from datetime import datetime, timezone
+    import hashlib
+    
+    access_token = create_access_token(subject=user.id)
+    refresh_token = create_refresh_token(subject=user.id)
+    
+    # Hash and save refresh token
+    token_payload = decode_token(refresh_token)
+    expires_at = datetime.fromtimestamp(token_payload["exp"], tz=timezone.utc).replace(tzinfo=None)
+    token_hash = hashlib.sha256(refresh_token.encode()).hexdigest()
+    
+    token_repo = RefreshTokenRepository(db)
+    db_refresh = RefreshToken(
+        user_id=user.id,
+        token_hash=token_hash,
+        expires_at=expires_at
+    )
+    await token_repo.create(db_refresh)
+    await db.commit()
+    
+    return ResponseEnvelope(
+        success=True,
+        data=AuthResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            user=UserResponse.model_validate(user)
+        ),
+        message="Registration successful." if is_new_user else "Login successful."
     )
 
 

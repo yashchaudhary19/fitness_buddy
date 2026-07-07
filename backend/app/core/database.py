@@ -9,17 +9,27 @@ connect_args = (
     {"check_same_thread": False}
     if is_sqlite
     else {
+        # Disable prepared statement caching — required for PgBouncer transaction mode
         "prepared_statement_cache_size": 0,
         "statement_cache_size": 0,
     }
 )
 
+# Pool settings differ for SQLite (single-file, no pool) vs PostgreSQL (Supabase)
+_pool_kwargs = {} if is_sqlite else {
+    "pool_size": 5,           # Max persistent connections kept open
+    "max_overflow": 10,       # Extra connections allowed under peak load
+    "pool_recycle": 300,      # Recycle connections every 5 minutes (Supabase drops idle ~10 min)
+    "pool_timeout": 30,       # Timeout waiting for a connection from pool
+    "pool_pre_ping": True,    # Always test connection health before handing out
+}
+
 engine = create_async_engine(
     settings.DATABASE_URL,
     echo=True if settings.ENVIRONMENT == "development" else False,
-    pool_pre_ping=True if not is_sqlite else False,
     connect_args=connect_args,
     future=True,
+    **_pool_kwargs,
 )
 
 # Async session factory
